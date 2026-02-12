@@ -1,6 +1,6 @@
 # Group 37 Code of Conduct
 
-This Code of Conduct outlines our commitment to fostering a positive, inclusive, and respectful environment for all members of Group 19. It includes:
+This Code of Conduct outlines our commitment to fostering a positive, inclusive, and respectful environment for all members of Group 37. It includes:
 
 ### Diversity and Inclusivity Statement
 This group is committed to creating a respectful and welcoming environment for everyone. Diversity of background, identity, and thought is valued and celebrated. All individuals, regardless of race, gender, age, disability, sexual orientation, religion, or any other characteristic, are treated with dignity and respect at all times
