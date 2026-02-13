@@ -24,6 +24,26 @@ These features let users make really specific searches. A DJ could filter for "e
 
 ## Section 3: Research Questions & Usage Scenarios
 
+### Persona
+Alex is a part-time DJ who manages club party playlists. He spends 4-6 hours a week manually sifting through songs on Spotify, but the genre tags are too broad, making it difficult to quickly find high-energy, danceable tracks. He needs a tool that can quickly filter songs by audio characteristics, saving time and improving playlist quality.
+
+### Usage Scenario
+Alex is preparing a playlist for his Saturday gym party. He opened Spotfind, selected the "High-Energy Workout Mix" mode, and set the filters: energy > 0.8, danceability > 0.9. The dashboard displayed a scatter plot of matching songs (x-axis: tempo, y-axis: energy, bubble size: danceability). He clicked on the top 10 previews and added them to the playlist. The whole process took only 5 minutes, instead of the usual hours.
+
+### User Stories
+When Alex prepares a playlist for his gym morning class on Saturdays, he needs to select the first 15 songs with energy > 0.85 and tempo 135-155 BPM, which allows him to complete the selection within 20 minutes.
+
+When Alex creates a 'Late Night Focused Study' playlist for clients, he needs to filter 10 songs with a valence < 0.3, acoustics > 0.7, and duration < 240 seconds, so that clients receive the perfect study tracks.
+
+When Alex wants to discover new songs for the dance floor, he needs to look at scatter plots of songs with danceability > 0.8 but popularity < 0.2. This way, he can find hidden potential songs that are not yet popular but are suitable for parties, thus improving his reputation.
+
 ## Section 4: Exploratory Data Analysis
+
+The summary table is for the second story mentioned above, which can be seen in jupyter notebook.
+
+As shown in the diagram, based on Alex's requirements—valence < 0.3, acoustics > 0.7, and duration < 240 seconds—all matching songs can be easily obtained. Selecting 10 of these satisfies Alex's needs, and he can see all the basic information about the matching songs, greatly saving time compared to manually selecting songs. Later, after we build the actual dashboard, users will only need to use the dashboard and won't need to touch anything related to code.
+
+Link: 
+https://github.com/UBC-MDS/DSCI-532_2026_37_Spotifind/blob/hubery/notebooks/analysis.ipynb.ipynb
 
 ## Section 5: App Sketch & Description
