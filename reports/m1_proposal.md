@@ -47,3 +47,20 @@ Link:
 https://github.com/UBC-MDS/DSCI-532_2026_37_Spotifind/blob/hubery/notebooks/analysis.ipynb.ipynb
 
 ## Section 5: App Sketch & Description
+
+Here is the ![Sketch](../img/sketch.png).
+
+The sketch shows the landing page of the app, and there are five main regions of the app: the filter control, the result table, the scatter plot, the top genre table, and finally the song search bar.
+
+- The filter control: It is a sidebar that can be opened or hidden from the main page. It contains danceability, tempo, and acoustic sliders as filters. Moreover, there will also be a mood map that controls valence and energy. For example, if you choose a point in the top-right corner, it will filter songs that have the highest energy and valence.
+
+- The result table: It shows the song name, artist, album name, and release date. It will display up to four songs on the page and more can be viewed when the table is expanded.
+
+- The scatter plot: It will include dropdown menus to choose the X and Y features you want to display on the plot.
+
+- The top genre table: It will show the genres that appear most frequently, ranked from most to least according to the filter results.
+
+- The song search bar: When you search for any song, it will display all the statistical features of that song. Eight features can be displayed initially, and more can be seen when expanded.
+
+
+
