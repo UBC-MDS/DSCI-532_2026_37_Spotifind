@@ -41,10 +41,10 @@ When Alex wants to discover new songs for the dance floor, he needs to look at s
 
 The summary table is for the second story mentioned above, which can be seen in jupyter notebook.
 
-As shown in the diagram, based on Alex's requirements—valence < 0.3, acoustics > 0.7, and duration < 240 seconds—all matching songs can be easily obtained. Selecting 10 of these satisfies Alex's needs, and he can see all the basic information about the matching songs, greatly saving time compared to manually selecting songs. Later, after we build the actual dashboard, users will only need to use the dashboard and won't need to touch anything related to code.
+As shown in the diagram, based on Alex's requirements, valence < 0.3, acoustics > 0.7, and duration < 240 seconds, all matching songs can be easily obtained. Selecting 10 of these satisfies Alex's needs, and he can see all the basic information about the matching songs, greatly saving time compared to manually selecting songs. Later, after we build the actual dashboard, users will only need to use the dashboard and won't need to touch anything related to code.
 
 Link: 
-https://github.com/UBC-MDS/DSCI-532_2026_37_Spotifind/blob/hubery/notebooks/analysis.ipynb.ipynb
+https://github.com/UBC-MDS/DSCI-532_2026_37_Spotifind/blob/hubery/notebooks/analysis.ipynb
 
 ## Section 5: App Sketch & Description
 
