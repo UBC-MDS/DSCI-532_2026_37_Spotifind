@@ -1,21 +1,23 @@
 from shiny import App, ui
 
 app_ui = ui.page_fillable(
-    ui.panel_title("Restaurant tipping"),
+    ui.panel_title("SPOTIFIND"),
     ui.layout_sidebar(
-        ui.sidebar("sidebar inputs", open="desktop"),
+        ui.sidebar("Filter control", open="desktop"),
+        
         ui.layout_columns(
-            ui.value_box("Total tippers", "Value 1"),
-            ui.value_box("Average tip", "Value 2"),
-            ui.value_box("Average bill", "Value 3"),
+            ui.card(ui.card_header("Results tables"), full_screen=True),
+        ),
+        ui.layout_columns(
+            ui.value_box("Drop down", "X, Y drop down for scatter plot"),
+            ui.card(ui.card_header("Top genre")),
             fill=False,
         ),
         ui.layout_columns(
-            ui.card(ui.card_header("Tips data"), full_screen=True),
-            ui.card(ui.card_header("Total bill vs tip"), full_screen=True),
+            ui.card(ui.card_header("Scatter plot"), full_screen=True),
+            ui.card(ui.card_header("Song search"), full_screen=True),
             col_widths=[6, 6],
         ),
-        ui.layout_columns(ui.card(ui.card_header("Tip percentages"), full_screen=True)),
     ),
 )
 
