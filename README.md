@@ -1,14 +1,10 @@
 # Spotifind
 
-Canada, Vancouver
+Spotifind is a dashboard that lets users search for music using Spotify's audio features instead of just genres. Users can filter songs by things like energy level, danceability, tempo, and mood (called "valence" in the data). Especially useful for people who are interested in the technical side of music, such as DJs or sound technicians.
 
 ## **Contributors**
 
 Rahiq Raees, Nguyen Nguyen, Shuhang Li, Jose Davila
-
-## **About**
-
-Spotifind is a dashboard that lets users search for music using Spotify's audio features instead of just genres. Users can filter songs by things like energy level, danceability, tempo, and mood (called "valence" in the data). Especially useful for people who are interested in the technical side of music, such as DJs or sound technicians.
 
 ## Installations
 
