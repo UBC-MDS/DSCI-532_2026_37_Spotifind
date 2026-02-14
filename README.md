@@ -41,7 +41,7 @@ shiny run src/app.py # → http://127.0.0.1:8000
 ## Dataset Acknowledgement
 
 This project was developed using the following dataset:
-- Dataset name: [spotifyr](https://www.rcharlie.com/spotifyr/)
+- Dataset name: [Spotify Songs](https://github.com/rfordatascience/tidytuesday/blob/main/data/2020/2020-01-21/readme.md)
 - License: MIT
 
 ## Contributing
