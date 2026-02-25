@@ -1,0 +1,17 @@
+shiny==1.5.1
+shinyswatch==0.9.0
+shinywidgets==0.7.1
+shinychat==0.2.9
+htmltools==0.6.0
+pandas==3.0.0
+numpy==2.4.2
+plotly==6.5.2
+matplotlib==3.10.8
+seaborn==0.13.2
+scipy==1.17.0
+statsmodels==0.14.6
+altair==5.5.0
+uvicorn==0.40.0
+starlette==0.52.1
+anyio==4.12.1
+requests==2.32.5
