@@ -24,8 +24,8 @@ app_ui = ui.page_fillable(
         ),
         ui.layout_columns(
             ui.card(
-                ui.card_header("Scatter plot"), \
-                ui.output_plot("scatter_plot")
+                ui.card_header("Scatter plot"),
+                ui.output_plot("scatter_plot"),
                 full_screen=True),
             ui.card(ui.card_header("Song search"), full_screen=True),
             col_widths=[6, 6],
