@@ -16,7 +16,6 @@ df["duration_s"] = (df["duration_ms"] / 1000).round(1)
 app_ui = ui.page_fillable(
     ui.panel_title("🎵 Spotifind"),
     ui.layout_sidebar(
-
         # RAHIQ — Sidebar with all filter sliders and genre dropdown
         ui.sidebar(
             ui.h5("Filter Controls"),
@@ -38,12 +37,52 @@ app_ui = ui.page_fillable(
             width=260,
             open="desktop",
         ),
+        # JOSE — KPI value boxes row
+        ui.layout_columns(
+            ui.value_box(
+                "Songs Found",
+                ui.output_text("kpi_count"),
+                showcase=ui.tags.span("🎵"),
+            ),
+            ui.value_box(
+                "Avg Energy",
+                ui.output_text("kpi_energy"),
+                showcase=ui.tags.span("⚡"),
+            ),
+            ui.value_box(
+                "Avg Danceability",
+                ui.output_text("kpi_dance"),
+                showcase=ui.tags.span("🕺"),
+            ),
+            col_widths=[4, 4, 4],
+        ),
+      
+        ui.layout_columns(
+            ui.value_box("Drop down", "X, Y drop down for scatter plot"),
+            ui.card(ui.card_header("Top genre")),
+            fill=False,
+        ),
+        ui.layout_columns(
+            ui.card(ui.card_header("Scatter plot"), full_screen=True),
+            ui.card(ui.card_header("Song search"), full_screen=True),
+            col_widths=[6, 6],
+
+        # JOSE — Footer
+        ui.hr(),
+        ui.p(
+            ui.HTML(
+                "Spotifind | Data: TidyTuesday Spotify Songs | "
+                "Authors: Rahiq Raees, Nguyen Nguyen, Shuhang Li, Jose Davila | "
+                "<a href='https://github.com/UBC-MDS/DSCI-532_2026_37_Spotifind' target='_blank'>GitHub Repo</a> | "
+                "Last updated: February 2026"
+            ),
+            style="color: grey; font-size: 0.8em; text-align: center;"
+        ),
     ),
 )
 
 # ── Server ────────────────────────────────────────────────────────────────────
 def server(input, output, session):
-
     # =========================================================================
     # RAHIQ — filtered_df reactive calc
     # Branch: feat/filter-controls
@@ -63,5 +102,24 @@ def server(input, output, session):
         if input.genre_filter() != "All":
             data = data[data["playlist_genre"] == input.genre_filter()]
         return data
+     
+    # JOSE — KPI render functions
+    @render.text
+    def kpi_count():
+        return f"{len(filtered_df()):,} songs"
+
+    @render.text
+    def kpi_energy():
+        data = filtered_df()
+        if data.empty:
+            return "—"
+        return f"{data['energy'].mean():.2f} / 1.0"
+
+    @render.text
+    def kpi_dance():
+        data = filtered_df()
+        if data.empty:
+            return "—"
+        return f"{data['danceability'].mean():.2f} / 1.0"
 
 app = App(app_ui, server)

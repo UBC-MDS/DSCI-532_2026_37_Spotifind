@@ -47,6 +47,6 @@ Nguyen Nguyen: nguyenuyennguyen03@gmail.com
 
 LI SHUHANG: lshfan123456@gmail.com
 
-Jose Davila: 
+Jose Davila: jose.dmyt@gmail.com
 
 Thank you for helping make Spotifind great!
