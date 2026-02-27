@@ -2,7 +2,7 @@ from shiny import App, ui
 import pandas as pd
 import matplotlib.pyplot as plt
 
-df = pd.read_csv("data/spotify_songs.csv")
+df = pd.read_csv("data\raw\spotify_songs.csv") 
 numeric_columns = df.select_dtypes(include="number").columns.tolist()
 
 app_ui = ui.page_fillable(
