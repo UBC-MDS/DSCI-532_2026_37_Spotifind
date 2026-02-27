@@ -67,6 +67,14 @@ app_ui = ui.page_fillable(
             ui.card(ui.card_header("Song search"), full_screen=True),
             col_widths=[6, 6],
 
+        # NGUYEN — Mood Map card
+        # Branch: feat/mood-map
+        # Add ui.card() with ui.output_plot("plot_mood_map")
+        ui.card(
+            ui.card_header("Mood Map — Valence vs Energy"),
+            ui.output_plot("plot_mood_map", height="400px"),
+        ),
+
         # JOSE — Footer
         ui.hr(),
         ui.p(
@@ -121,5 +129,54 @@ def server(input, output, session):
         if data.empty:
             return "—"
         return f"{data['danceability'].mean():.2f} / 1.0"
+
+    # =========================================================================
+    # NGUYEN — Mood Map render function
+    # Branch: feat/mood-map
+    # Add @render.plot for plot_mood_map.
+    # =========================================================================
+    @render.plot
+    def plot_mood_map():
+        data = filtered_df()
+        fig, ax = plt.subplots(figsize=(10, 5))
+
+        if data.empty:
+            ax.text(0.5, 0.5, "No songs match filters", ha="center", va="center", fontsize=14)
+            ax.set_xlim(0, 1)
+            ax.set_ylim(0, 1)
+            return fig
+
+        sample = data.sample(min(500, len(data)), random_state=42)
+        scatter = ax.scatter(
+            sample["valence"], sample["energy"],
+            c=sample["danceability"], cmap="viridis",
+            alpha=0.6, s=25, edgecolors="none"
+        )
+        plt.colorbar(scatter, ax=ax, label="Danceability")
+
+        ax.set_xlabel("Valence (Sadness → Happiness)", fontsize=12)
+        ax.set_ylabel("Energy (Calm → Intense)", fontsize=12)
+        ax.set_title(f"Mood Map  —  {len(data):,} songs", fontsize=13)
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+
+
+        ax.axhspan(0.5, 1.0, xmin=0.0, xmax=0.5, facecolor="#c0d9f5", alpha=0.25)
+        ax.axhspan(0.5, 1.0, xmin=0.5, xmax=1.0, facecolor="#f5e6c0", alpha=0.25)
+        ax.axhspan(0.0, 0.5, xmin=0.0, xmax=0.5, facecolor="#d4c0f5", alpha=0.25)
+        ax.axhspan(0.0, 0.5, xmin=0.5, xmax=1.0, facecolor="#c0f5d0", alpha=0.25)
+        
+        ax.axhline(0.5, color="#555555", linewidth=1.5, linestyle="--", alpha=0.8)
+        ax.axvline(0.5, color="#555555", linewidth=1.5, linestyle="--", alpha=0.8)
+        
+        label_style = dict(transform=ax.transAxes, fontsize=11, fontweight="bold", alpha=0.75)
+        ax.text(0.02, 0.97, "Sad & Intense", va="top", color="#2a5fa5", **label_style)
+        ax.text(0.55, 0.97, "Happy & Intense", va="top", color="#a57a2a", **label_style)
+        ax.text(0.02, 0.03, "Sad & Calm", va="bottom", color="#6a2aa5", **label_style)
+        ax.text(0.55, 0.03, "Happy & Calm", va="bottom", color="#2aa55a", **label_style)
+
+        fig.tight_layout()
+        return fig
+
 
 app = App(app_ui, server)
