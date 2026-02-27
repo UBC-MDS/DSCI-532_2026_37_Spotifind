@@ -2,6 +2,13 @@
 
 ## 2.1 Updated Job Stories
 
+| #   | Job Story                       | Status         | Notes                         |
+| --- | ------------------------------- | -------------- | ----------------------------- |
+| 1   | When Alex prepares a playlist for his gym morning class on Saturdays, he needs to select the first 15 songs with energy > 0.85 and tempo 135-155 BPM, which allows him to complete the selection within 20 minutes. | In progress |  |
+| 2   | When Alex creates a 'Late Night Focused Study' playlist for clients, he needs to filter 10 songs with a valence < 0.3, acoustics > 0.7, and duration < 240 seconds, so that clients receive the perfect study tracks. | In progress |  |
+| 3   | When Alex wants to discover new songs for the dance floor, he needs to look at scatter plots of songs with danceability > 0.8 but popularity < 0.2, so that he can find hidden potential songs that are not yet popular but are suitable for parties, thus improving his reputation. | In progress |  |
+
+
 ## 2.2 Component Inventory
 
 | ID                   | Type          | Shiny widget / renderer | Depends on                                                              | Job story  |
