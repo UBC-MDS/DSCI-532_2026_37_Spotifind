@@ -1,4 +1,4 @@
-from shiny import App, ui
+from shiny import App, ui, render
 import pandas as pd
 import matplotlib.pyplot as plt
 
