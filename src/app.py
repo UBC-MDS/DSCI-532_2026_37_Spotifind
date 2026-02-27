@@ -68,8 +68,6 @@ app_ui = ui.page_fillable(
             col_widths=[6, 6],
 
         # NGUYEN — Mood Map card
-        # Branch: feat/mood-map
-        # Add ui.card() with ui.output_plot("plot_mood_map")
         ui.card(
             ui.card_header("Mood Map — Valence vs Energy"),
             ui.output_plot("plot_mood_map", height="400px"),
@@ -130,11 +128,7 @@ def server(input, output, session):
             return "—"
         return f"{data['danceability'].mean():.2f} / 1.0"
 
-    # =========================================================================
     # NGUYEN — Mood Map render function
-    # Branch: feat/mood-map
-    # Add @render.plot for plot_mood_map.
-    # =========================================================================
     @render.plot
     def plot_mood_map():
         data = filtered_df()
