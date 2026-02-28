@@ -1,8 +1,8 @@
 # Spotifind
 
-Spotifind is a dashboard that lets users search for music using Spotify's audio features instead of just genres. Users can filter songs by things like energy level, danceability, tempo, and mood (called "valence" in the data). Especially useful for people who are interested in the technical side of music, such as DJs or sound technicians.
-
 ## **Users**
+
+Spotifind is a dashboard that lets users search for music using Spotify's audio features instead of just genres. Users can filter songs by features like energy level, danceability, tempo, and mood (called "valence" in the data). Especially useful for people who are interested in the technical side of music, such as DJs or sound technicians.
 
 ![til](./img/demo.gif)
 
@@ -14,7 +14,7 @@ Rahiq Raees, Nguyen Nguyen, Shuhang Li, Jose Davila
 
 As the dashboard is being developed, a live preview for developers can be accessed [here](https://019c9738-9c84-097d-6189-117642c8821f.share.connect.posit.cloud/)
 
-If you are interested in contributing to this dashboard, please review the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information on:
+If you are interested in contributing to this dashboard, please review the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
 
 ## Dataset Acknowledgement
 
