@@ -6,6 +6,8 @@ Spotifind is a dashboard that lets users search for music using Spotify's audio 
 
 Rahiq Raees, Nguyen Nguyen, Shuhang Li, Jose Davila
 
+![til](./img/demo.gif)
+
 ## Installations
 
 1.  Fork the repository: https://github.com/UBC-MDS/DSCI-532_2026_37_Spotifind.git
