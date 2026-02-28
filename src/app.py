@@ -13,7 +13,7 @@ df = df.drop_duplicates(subset="track_id")
 df["duration_s"] = (df["duration_ms"] / 1000).round(1)
 
 # ── UI ────────────────────────────────────────────────────────────────────────
-app_ui = ui.page_fillable(
+app_ui = ui.page_fluid(
     ui.panel_title("🎵 Spotifind"),
     ui.layout_sidebar(
         # RAHIQ — Sidebar with all filter sliders and genre dropdown
@@ -56,17 +56,19 @@ app_ui = ui.page_fillable(
             ),
             col_widths=[4, 4, 4],
         ),
-      
+
+        #SHUHANG: implement the "top genre"
         ui.layout_columns(
             ui.value_box("Drop down", "X, Y drop down for scatter plot"),
-            ui.card(ui.card_header("Top genre")),
+            ui.card(ui.card_header("Top genre"),ui.output_data_frame("tbl_top_genre")),
             fill=False,
         ),
         ui.layout_columns(
             ui.card(ui.card_header("Scatter plot"), full_screen=True),
-            ui.card(ui.card_header("Song search"), full_screen=True),
+            #SHUHANG: implement "song search"
+            ui.card(ui.card_header("Song search"),ui.output_data_frame("tbl_results"),full_screen=True),
             col_widths=[6, 6],
-
+        ),
         # NGUYEN — Mood Map card
         ui.card(
             ui.card_header("Mood Map — Valence vs Energy"),
@@ -172,5 +174,37 @@ def server(input, output, session):
         fig.tight_layout()
         return fig
 
-
+    # SHUHANG: finish 'Top genres' and 'Song search'
+    @render.data_frame
+    def tbl_top_genre():
+        data = filtered_df()
+        if data.empty:
+            return render.DataGrid(pd.DataFrame())
+        top = (
+            data.groupby("playlist_genre")
+            .size()
+            .reset_index(name="Song Count")
+            .rename(columns={"playlist_genre": "Genre"})
+            .sort_values("Song Count", ascending=False)
+            .head(6)
+            .reset_index(drop=True)
+        )
+        return render.DataGrid(top)
+    @render.data_frame
+    def tbl_results():
+        data = filtered_df()
+        if data.empty:
+            return render.DataGrid(pd.DataFrame())
+        cols = {
+            "track_name": "Song",
+            "track_artist": "Artist",
+            "track_album_name": "Album",
+            "track_album_release_date": "Release Date",
+            "playlist_genre": "Genre",
+            "track_popularity": "Popularity",
+        }
+        return render.DataGrid(
+            data[list(cols.keys())].rename(columns=cols).reset_index(drop=True),
+            filters=True,
+        )    
 app = App(app_ui, server)

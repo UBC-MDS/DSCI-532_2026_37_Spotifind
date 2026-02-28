@@ -32,6 +32,24 @@
 ---
 
 ## 2.3 Reactivity Diagram
+```mermaid
+flowchart TD
+    A[/input_energy/] --> F{filtered_df}
+    B[/input_tempo/] --> F
+    C[/input_acousticness/] --> F
+    D[/input_valence/] --> F
+    E[/input_duration_s/] --> F
+    G[/input_danceability/] --> F
+    H[/input_popularity/] --> F
+    I[/input_genre_filter/] --> F
+
+    F --> O1([kpi_count])
+    F --> O2([kpi_energy])
+    F --> O3([kpi_dance])
+    F --> O4([plot_mood_map])
+    F --> O5([tbl_results])
+    F --> O6([tbl_top_genre])
+```
 
 ## 2.4 Calculation Details
 
