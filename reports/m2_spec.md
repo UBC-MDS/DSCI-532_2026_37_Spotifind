@@ -34,24 +34,35 @@
 ---
 
 ## 2.3 Reactivity Diagram
+
 ```mermaid
 flowchart TD
-    A[/input_energy/] --> F{filtered_df}
-    B[/input_tempo/] --> F
-    C[/input_acousticness/] --> F
-    D[/input_valence/] --> F
-    E[/input_duration_s/] --> F
-    G[/input_danceability/] --> F
-    H[/input_popularity/] --> F
-    I[/input_genre_filter/] --> F
-
-    F --> O1([kpi_count])
-    F --> O2([kpi_energy])
-    F --> O3([kpi_dance])
-    F --> O4([plot_mood_map])
-    F --> O5([tbl_results])
-    F --> O6([tbl_top_genre])
+  A[/input_danceability/] --> F{{filtered_df}}
+  B[/input_tempo/] --> F
+  C[/input_acousticness/] --> F
+  D[/input_valence/] --> F
+  E[/input_energy/] --> F
+  G[/input_genre_filter/] --> F
+  H[/input_duration_s/] --> F
+  I[/input_popularity/] --> F
+  J[/input_reset_all/] --> R[_reset_filters]
+  R --> A
+  R --> B
+  R --> C
+  R --> D
+  R --> E
+  R --> G
+  R --> H
+  R --> I
+  F --> K1([kpi_count])
+  F --> K2([kpi_energy])
+  F --> K3([kpi_dance])
+  F --> P1([tbl_results])
+  F --> P2([tbl_top_genre])
+  F --> P3([plot_mood_map])
 ```
+
+---
 
 ## 2.4 Calculation Details
 
@@ -60,6 +71,8 @@ flowchart TD
 - **Depends on:** `input_danceability`, `input_tempo`, `input_acousticness`, `input_valence`, `input_energy`, `input_duration_s`, `input_popularity`, `input_genre_filter`
 - **Transformation:** Filters the dataset to rows where danceability, tempo, acousticness, valence, energy, duration, and popularity fall within the selected slider ranges. If a specific genre is selected, further filters to only rows matching that genre.
 - **Consumed by:** `kpi_count`, `kpi_energy`, `kpi_dance`, `plot_mood_map`, `tbl_results`, `tbl_top_genre`
+
+---
 
 ## Complexity Enhancement
 
