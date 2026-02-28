@@ -13,7 +13,7 @@ df = df.drop_duplicates(subset="track_id")
 df["duration_s"] = (df["duration_ms"] / 1000).round(1)
 
 # ── UI ────────────────────────────────────────────────────────────────────────
-app_ui = ui.page_fillable(
+app_ui = ui.page_fluid(
 
     # JOSE — Styled dashboard header using Bootstrap utilities (no inline CSS needed)
     # Branch: feat/kpi-layout
