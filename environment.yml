@@ -21,3 +21,4 @@ dependencies:
   - pip:
     - shinywidgets>=0.2.0
     - shinyswatch>=0.4.0
+    - libsass==0.23.0

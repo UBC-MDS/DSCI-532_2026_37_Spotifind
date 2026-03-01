@@ -12,14 +12,41 @@ There are many ways to contribute, including:
 - Improving documentation
 - Helping with testing and reviewing
 
-## Getting Started
+## General contributing guide
 
-1. Fork the repository and clone it locally.
-2. Create a new branch for your feature or bug fix.
-3. Follow the coding style and guidelines (see below).
-4. Write tests for new code or features.
-5. Run existing tests to ensure nothing breaks.
-6. Submit a pull request with a clear description of your changes.
+1.  Fork the repository: https://github.com/UBC-MDS/DSCI-532_2026_37_Spotifind.git
+
+2.  Clone the fork locally using:
+
+``` bash
+git clone git@github.com:UBC-MDS/DSCI-532_2026_37_Spotifind.git
+```
+Then please cd into the root of the repo by:
+```bash
+cd DSCI-532_2026_37_Spotifind
+```
+
+3.  Create the virtual environment with:
+
+``` bash
+conda env create -f environment.yml
+```
+
+4.  Once the environment is created, activate it with:
+
+``` bash
+conda activate spotifind
+```
+
+5. Create a new branch for your feature or bug fix.
+
+6.  Run the app locally with:
+
+``` bash
+shiny run src/app.py # → http://127.0.0.1:8000
+```
+
+7. Submit a pull request with a clear description of your changes
 
 ## Code Style and Guidelines
 
@@ -33,7 +60,7 @@ If you encounter bugs or want to request features, please open an issue on GitHu
 
 ## Code of Conduct
 
-By contributing, you agree to abide by our [Code of Conduct](https://github.ubc.ca/roccolee/DSCI_524_Group_19_Missingness_Analyzer/blob/main/CODE_OF_CONDUCT.md), which outlines expected behavior within this community.
+By contributing, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md), which outlines expected behavior within this community.
 
 ## Need Help?
 
