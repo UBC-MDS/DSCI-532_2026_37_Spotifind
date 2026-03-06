@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from shiny import App, reactive, render, ui
+import plotly.express as px
 
 # =============================================================================
 # RAHIQ — Data loading and sidebar filter controls
@@ -52,7 +53,7 @@ app_ui = ui.page_fluid(
                         selected="All",
                     ),
                 ),
-                open="Audio Features",
+                open=["Audio Features", "Track Properties"],
             ),
             ui.hr(),
             ui.input_action_button(
@@ -69,19 +70,19 @@ app_ui = ui.page_fluid(
             ui.value_box(
                 "Songs Found",
                 ui.output_text("kpi_count"),
-                showcase=ui.tags.span("🎵"),
+                showcase=ui.tags.span("🎵", style="font-size:2.5rem;"),
                 theme="primary",
             ),
             ui.value_box(
                 "Avg Energy",
                 ui.output_text("kpi_energy"),
-                showcase=ui.tags.span("⚡"),
+                showcase=ui.tags.span("⚡", style="font-size:2.5rem;"),
                 theme="success",
             ),
             ui.value_box(
                 "Avg Danceability",
                 ui.output_text("kpi_dance"),
-                showcase=ui.tags.span("🕺"),
+                showcase=ui.tags.span("🕺", style="font-size:2.5rem;"),
                 theme="info",
             ),
             col_widths=[4, 4, 4],
@@ -91,7 +92,8 @@ app_ui = ui.page_fluid(
         # Branch: feat/mood-map
         ui.card(
             ui.card_header("Mood Map — Valence vs Energy"),
-            ui.output_plot("plot_mood_map", height="400px"),
+            ui.output_ui("plot_mood_map"),
+            #ui.output_plot("plot_mood_map", height="400px"),
             full_screen=True,
         ),
 
@@ -105,7 +107,8 @@ app_ui = ui.page_fluid(
             ),
             ui.card(
                 ui.card_header("Top Genres"),
-                ui.output_data_frame("tbl_top_genre"),
+                #ui.output_data_frame("tbl_top_genre"),
+                ui.output_plot("tbl_top_genre"),
             ),
             col_widths=[8, 4],
         ),
@@ -192,48 +195,72 @@ def server(input, output, session):
     # NGUYEN — Mood Map render function
     # Branch: feat/mood-map
     # =========================================================================
-    @render.plot
+    # 改后（完整替换为以下内容）
+    @render.ui
     def plot_mood_map():
         data = filtered_df()
-        fig, ax = plt.subplots(figsize=(10, 5))
 
         if data.empty:
-            ax.text(0.5, 0.5, "No songs match filters", ha="center", va="center", fontsize=14)
-            ax.set_xlim(0, 1)
-            ax.set_ylim(0, 1)
-            return fig
+            return ui.p("No songs match filters", style="text-align:center; padding:2rem;")
 
         sample = data.sample(min(500, len(data)), random_state=42)
-        scatter = ax.scatter(
-            sample["valence"], sample["energy"],
-            c=sample["danceability"], cmap="viridis",
-            alpha=0.6, s=25, edgecolors="none"
+
+        fig = px.scatter(
+            sample,
+            x="valence",
+            y="energy",
+            color="danceability",
+            color_continuous_scale="viridis",
+            hover_data={
+                "track_name": True,
+                "track_artist": True,
+                "danceability": ":.2f",
+                "valence": ":.2f",
+                "energy": ":.2f",
+            },
+            labels={
+                "valence": "Valence (Sadness → Happiness)",
+                "energy": "Energy (Calm → Intense)",
+                "danceability": "Danceability",
+            },
+            title=f"Mood Map  —  {len(data):,} songs",
+            opacity=0.6,
         )
-        plt.colorbar(scatter, ax=ax, label="Danceability")
 
-        ax.set_xlabel("Valence (Sadness → Happiness)", fontsize=12)
-        ax.set_ylabel("Energy (Calm → Intense)", fontsize=12)
-        ax.set_title(f"Mood Map  —  {len(data):,} songs", fontsize=13)
-        ax.set_xlim(0, 1)
-        ax.set_ylim(0, 1)
+        fig.add_shape(type="rect", x0=0, x1=0.5, y0=0.5, y1=1.0,
+                    fillcolor="#c0d9f5", opacity=0.25, line_width=0)
+        fig.add_shape(type="rect", x0=0.5, x1=1.0, y0=0.5, y1=1.0,
+                    fillcolor="#f5e6c0", opacity=0.25, line_width=0)
+        fig.add_shape(type="rect", x0=0, x1=0.5, y0=0.0, y1=0.5,
+                    fillcolor="#d4c0f5", opacity=0.25, line_width=0)
+        fig.add_shape(type="rect", x0=0.5, x1=1.0, y0=0.0, y1=0.5,
+                    fillcolor="#c0f5d0", opacity=0.25, line_width=0)
 
-        # Quadrant backgrounds
-        ax.axhspan(0.5, 1.0, xmin=0.0, xmax=0.5, facecolor="#c0d9f5", alpha=0.25)
-        ax.axhspan(0.5, 1.0, xmin=0.5, xmax=1.0, facecolor="#f5e6c0", alpha=0.25)
-        ax.axhspan(0.0, 0.5, xmin=0.0, xmax=0.5, facecolor="#d4c0f5", alpha=0.25)
-        ax.axhspan(0.0, 0.5, xmin=0.5, xmax=1.0, facecolor="#c0f5d0", alpha=0.25)
-        # Quadrant divider lines
-        ax.axhline(0.5, color="#555555", linewidth=1.5, linestyle="--", alpha=0.8)
-        ax.axvline(0.5, color="#555555", linewidth=1.5, linestyle="--", alpha=0.8)
-        # Quadrant labels
-        label_style = dict(transform=ax.transAxes, fontsize=11, fontweight="bold", alpha=0.75)
-        ax.text(0.02, 0.97, "Sad & Intense", va="top", color="#2a5fa5", **label_style)
-        ax.text(0.55, 0.97, "Happy & Intense", va="top", color="#a57a2a", **label_style)
-        ax.text(0.02, 0.03, "Sad & Calm", va="bottom", color="#6a2aa5", **label_style)
-        ax.text(0.55, 0.03, "Happy & Calm", va="bottom", color="#2aa55a", **label_style)
+        fig.add_hline(y=0.5, line_dash="dash", line_color="#555555", line_width=1.5, opacity=0.8)
+        fig.add_vline(x=0.5, line_dash="dash", line_color="#555555", line_width=1.5, opacity=0.8)
 
-        fig.tight_layout()
-        return fig
+        for x, y, text, color in [
+            (0.02, 0.98, "Sad & Intense",   "#2a5fa5"),
+            (0.52, 0.98, "Happy & Intense", "#a57a2a"),
+            (0.02, 0.02, "Sad & Calm",      "#6a2aa5"),
+            (0.52, 0.02, "Happy & Calm",    "#2aa55a"),
+        ]:
+            fig.add_annotation(
+                x=x, y=y, text=f"<b>{text}</b>",
+                xref="paper", yref="paper",
+                showarrow=False,
+                font=dict(size=11, color=color),
+                opacity=0.75,
+            )
+
+        fig.update_layout(
+            height=400,
+            margin=dict(l=40, r=40, t=50, b=40),
+            xaxis=dict(range=[0, 1]),
+            yaxis=dict(range=[0, 1]),
+        )
+
+        return ui.HTML(fig.to_html(full_html=False, include_plotlyjs=True))
 
     # =========================================================================
     # SHUHANG — Results Table and Top Genres render functions
@@ -260,20 +287,38 @@ def server(input, output, session):
 
         return render.DataGrid(data, height="250px", width="100%", styles=styles)
 
-    @render.data_frame
+    @render.plot
     def tbl_top_genre():
         data = filtered_df()
+        fig, ax = plt.subplots(figsize=(4, 3))
+
         if data.empty:
-            return render.DataGrid(pd.DataFrame(columns=["Genre", "Count"]))
+            ax.text(0.5, 0.5, "No songs match filters",
+                    ha="center", va="center", fontsize=12)
+            ax.axis("off")
+            return fig
+
         top = (
             data["playlist_genre"]
             .value_counts()
             .reset_index()
             .rename(columns={"playlist_genre": "Genre", "count": "Count"})
             .head(6)
+            .sort_values("Count", ascending=True) 
         )
-        top.index = range(1, len(top) + 1)
-        return render.DataGrid(top, width="100%")
 
+        bars = ax.barh(top["Genre"], top["Count"], color="#1DB954", edgecolor="none")
+
+        for bar, val in zip(bars, top["Count"]):
+            ax.text(bar.get_width() + 20, bar.get_y() + bar.get_height() / 2,
+                    f"{val:,}", va="center", fontsize=9)
+
+        ax.set_xlabel("Number of Songs", fontsize=10)
+        ax.set_title("Top Genres", fontsize=11, fontweight="bold")
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.set_xlim(0, top["Count"].max() * 1.15)  
+        fig.tight_layout()
+        return fig
 
 app = App(app_ui, server)
