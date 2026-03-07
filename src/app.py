@@ -9,17 +9,13 @@ from querychat import QueryChat
 # Load ANTHROPIC_API_KEY from .env
 load_dotenv()
 
-# =============================================================================
 # Data loading
-# =============================================================================
 df = pd.read_csv("data/raw/spotify_songs.csv")
 df = df.drop_duplicates(subset="track_id")
 df["duration_s"] = (df["duration_ms"] / 1000).round(1)
 
-# =============================================================================
 # QueryChat — initialized once at module level with a small column subset
 # to keep the schema prompt concise and reduce token usage
-# =============================================================================
 AI_COLS = [
     "track_name", "track_artist", "track_album_name",
     "track_album_release_date", "playlist_genre",
@@ -32,18 +28,16 @@ qc = QueryChat(
     client="anthropic/claude-haiku-4-5-20251001",
 )
 
-# =============================================================================
 # UI
-# =============================================================================
 app_ui = ui.page_navbar(
 
-    # ── Tab 1: Original Dashboard ────────────────────────────────────────────
+    # Original Dashboard
     ui.nav_panel(
         "🎵 Dashboard",
 
         ui.layout_sidebar(
 
-            # RAHIQ — Sidebar with accordion-grouped filters
+            # Sidebar with accordion-grouped filters
             ui.sidebar(
                 ui.h5("Filter Controls"),
                 ui.hr(),
@@ -78,7 +72,7 @@ app_ui = ui.page_navbar(
                 open="desktop",
             ),
 
-            # JOSE — KPI value boxes
+            # KPI value boxes
             ui.layout_columns(
                 ui.value_box(
                     "Songs Found",
@@ -101,14 +95,14 @@ app_ui = ui.page_navbar(
                 col_widths=[4, 4, 4],
             ),
 
-            # NGUYEN — Mood Map card
+            # Mood Map card
             ui.card(
                 ui.card_header("Mood Map — Valence vs Energy"),
                 ui.output_ui("plot_mood_map"),
                 full_screen=True,
             ),
 
-            # SHUHANG — Results Table and Top Genres cards
+            # Results Table and Top Genres cards
             ui.layout_columns(
                 ui.card(
                     ui.card_header("Results Table"),
@@ -135,7 +129,7 @@ app_ui = ui.page_navbar(
         ),
     ),
 
-    # ── Tab 2: AI Explorer ───────────────────────────────────────────────────
+    # AI Explorer
     ui.nav_panel(
         "🤖 AI Explorer",
 
@@ -162,7 +156,6 @@ app_ui = ui.page_navbar(
             ),
 
             # Visualizations driven by the AI-filtered dataframe
-            # (Team Member 2 will fill these in on feat/ai-tab-viz)
             ui.layout_columns(
                 ui.card(
                     ui.card_header("Mood Map — AI Filtered"),
@@ -189,17 +182,13 @@ app_ui = ui.page_navbar(
 )
 
 
-# =============================================================================
 # Server
-# =============================================================================
 def server(input, output, session):
 
-    # ── Initialize querychat server — returns session-specific reactive state ─
+    # Initialize querychat server
     qc_state = qc.server()
 
-    # =========================================================================
-    # Tab 1 — existing server logic (unchanged)
-    # =========================================================================
+    # existing server logic 
 
     @reactive.calc
     def filtered_df():
@@ -319,10 +308,7 @@ def server(input, output, session):
         fig.tight_layout()
         return fig
 
-    # =========================================================================
-    # Tab 2 — AI Explorer server logic
-    # =========================================================================
-
+    # AI Explorer server logic
     @reactive.calc
     def ai_filtered_df():
         # qc_state.df() returns a narwhals DataFrame; .to_native() gives us pandas
@@ -346,7 +332,6 @@ def server(input, output, session):
     def download_ai_data():
         yield ai_filtered_df().to_csv(index=False)
 
-    # NOTE: stubs for Team Member 2 to replace on feat/ai-tab-viz
     @render.ui
     def ai_plot_mood_map():
         data = ai_filtered_df()
