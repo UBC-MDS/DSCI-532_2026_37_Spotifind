@@ -161,8 +161,8 @@ app_ui = ui.page_navbar(
                 full_screen=True,
             ),
 
-            # NGUYEN — Visualizations driven by the AI-filtered dataframe
-            # Branch: feat/ai-tab-viz
+            # Visualizations driven by the AI-filtered dataframe
+            # (Team Member 2 will fill these in on feat/ai-tab-viz)
             ui.layout_columns(
                 ui.card(
                     ui.card_header("Mood Map — AI Filtered"),
@@ -325,6 +325,7 @@ def server(input, output, session):
 
     @reactive.calc
     def ai_filtered_df():
+        # qc_state.df() returns a narwhals DataFrame; .to_native() gives us pandas
         return qc_state.df()
 
     @render.data_frame
@@ -345,7 +346,7 @@ def server(input, output, session):
     def download_ai_data():
         yield ai_filtered_df().to_csv(index=False)
 
-    # NGUYEN — AI tab visualizations (feat/ai-tab-viz)
+    # NOTE: stubs for Team Member 2 to replace on feat/ai-tab-viz
     @render.ui
     def ai_plot_mood_map():
         data = ai_filtered_df()
