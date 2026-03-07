@@ -1,20 +1,25 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+from dotenv import load_dotenv
 from shiny import App, reactive, render, ui
 import plotly.express as px
-from dotenv import load_dotenv
 from querychat import QueryChat
 
-# Load ANTHROPIC_API_KEY
+# Load ANTHROPIC_API_KEY from .env
 load_dotenv()
 
+# =============================================================================
 # Data loading
+# =============================================================================
 df = pd.read_csv("data/raw/spotify_songs.csv")
 df = df.drop_duplicates(subset="track_id")
 df["duration_s"] = (df["duration_ms"] / 1000).round(1)
 
-# QueryChat 
+# =============================================================================
+# QueryChat — initialized once at module level with a small column subset
+# to keep the schema prompt concise and reduce token usage
+# =============================================================================
 AI_COLS = [
     "track_name", "track_artist", "track_album_name",
     "track_album_release_date", "playlist_genre",
@@ -27,16 +32,18 @@ qc = QueryChat(
     client="anthropic/claude-haiku-4-5-20251001",
 )
 
+# =============================================================================
 # UI
+# =============================================================================
 app_ui = ui.page_navbar(
 
-    # Original Dashboard 
+    # ── Tab 1: Original Dashboard ────────────────────────────────────────────
     ui.nav_panel(
         "🎵 Dashboard",
 
         ui.layout_sidebar(
 
-            # Sidebar with accordion-grouped filters
+            # RAHIQ — Sidebar with accordion-grouped filters
             ui.sidebar(
                 ui.h5("Filter Controls"),
                 ui.hr(),
@@ -71,7 +78,7 @@ app_ui = ui.page_navbar(
                 open="desktop",
             ),
 
-            # KPI value boxes
+            # JOSE — KPI value boxes
             ui.layout_columns(
                 ui.value_box(
                     "Songs Found",
@@ -94,14 +101,14 @@ app_ui = ui.page_navbar(
                 col_widths=[4, 4, 4],
             ),
 
-            # Mood Map card
+            # NGUYEN — Mood Map card
             ui.card(
                 ui.card_header("Mood Map — Valence vs Energy"),
                 ui.output_ui("plot_mood_map"),
                 full_screen=True,
             ),
 
-            # Results Table and Top Genres cards
+            # SHUHANG — Results Table and Top Genres cards
             ui.layout_columns(
                 ui.card(
                     ui.card_header("Results Table"),
@@ -128,7 +135,7 @@ app_ui = ui.page_navbar(
         ),
     ),
 
-    # AI Explorer 
+    # ── Tab 2: AI Explorer ───────────────────────────────────────────────────
     ui.nav_panel(
         "🤖 AI Explorer",
 
@@ -154,7 +161,8 @@ app_ui = ui.page_navbar(
                 full_screen=True,
             ),
 
-            # Visualizations driven by the AI-filtered dataframe
+            # NGUYEN — Visualizations driven by the AI-filtered dataframe
+            # Branch: feat/ai-tab-viz
             ui.layout_columns(
                 ui.card(
                     ui.card_header("Mood Map — AI Filtered"),
@@ -170,7 +178,7 @@ app_ui = ui.page_navbar(
         ),
     ),
 
-    # App-level header 
+    # ── App-level header ─────────────────────────────────────────────────────
     title=ui.div(
         ui.span("🎵 Spotifind", class_="fw-bold"),
         ui.span(" · Spotify Song Explorer", class_="opacity-75 small ms-2"),
@@ -181,13 +189,17 @@ app_ui = ui.page_navbar(
 )
 
 
+# =============================================================================
 # Server
+# =============================================================================
 def server(input, output, session):
 
-    # Initialize querychat
+    # ── Initialize querychat server — returns session-specific reactive state ─
     qc_state = qc.server()
 
-    # existing server
+    # =========================================================================
+    # Tab 1 — existing server logic (unchanged)
+    # =========================================================================
 
     @reactive.calc
     def filtered_df():
@@ -307,7 +319,10 @@ def server(input, output, session):
         fig.tight_layout()
         return fig
 
-    # AI Explorer server logic
+    # =========================================================================
+    # Tab 2 — AI Explorer server logic
+    # =========================================================================
+
     @reactive.calc
     def ai_filtered_df():
         return qc_state.df()
@@ -330,7 +345,7 @@ def server(input, output, session):
     def download_ai_data():
         yield ai_filtered_df().to_csv(index=False)
 
-    # AI tab visualizations
+    # NGUYEN — AI tab visualizations (feat/ai-tab-viz)
     @render.ui
     def ai_plot_mood_map():
         data = ai_filtered_df()
