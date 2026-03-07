@@ -20,3 +20,4 @@ querychat==0.5.1
 chatlas==0.15.2
 duckdb==1.4.4
 python-dotenv==1.2.2
+anthropic==0.39.0
