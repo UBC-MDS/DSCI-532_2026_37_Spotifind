@@ -9,17 +9,13 @@ from querychat import QueryChat
 # Load ANTHROPIC_API_KEY from .env
 load_dotenv()
 
-# =============================================================================
 # Data loading
-# =============================================================================
 df = pd.read_csv("data/raw/spotify_songs.csv")
 df = df.drop_duplicates(subset="track_id")
 df["duration_s"] = (df["duration_ms"] / 1000).round(1)
 
-# =============================================================================
 # QueryChat — initialized once at module level with a small column subset
 # to keep the schema prompt concise and reduce token usage
-# =============================================================================
 AI_COLS = [
     "track_name", "track_artist", "track_album_name",
     "track_album_release_date", "playlist_genre",
@@ -32,18 +28,16 @@ qc = QueryChat(
     client="anthropic/claude-haiku-4-5-20251001",
 )
 
-# =============================================================================
 # UI
-# =============================================================================
 app_ui = ui.page_navbar(
 
-    # ── Tab 1: Original Dashboard ────────────────────────────────────────────
+    # Original Dashboard
     ui.nav_panel(
         "🎵 Dashboard",
 
         ui.layout_sidebar(
 
-            # RAHIQ — Sidebar with accordion-grouped filters
+            # Sidebar with accordion-grouped filters
             ui.sidebar(
                 ui.h5("Filter Controls"),
                 ui.hr(),
@@ -78,7 +72,7 @@ app_ui = ui.page_navbar(
                 open="desktop",
             ),
 
-            # JOSE — KPI value boxes
+            # KPI value boxes
             ui.layout_columns(
                 ui.value_box(
                     "Songs Found",
@@ -101,14 +95,14 @@ app_ui = ui.page_navbar(
                 col_widths=[4, 4, 4],
             ),
 
-            # NGUYEN — Mood Map card
+            # Mood Map card
             ui.card(
                 ui.card_header("Mood Map — Valence vs Energy"),
                 ui.output_ui("plot_mood_map"),
                 full_screen=True,
             ),
 
-            # SHUHANG — Results Table and Top Genres cards
+            # Results Table and Top Genres cards
             ui.layout_columns(
                 ui.card(
                     ui.card_header("Results Table"),
@@ -135,7 +129,7 @@ app_ui = ui.page_navbar(
         ),
     ),
 
-    # ── Tab 2: AI Explorer ───────────────────────────────────────────────────
+    # AI Explorer
     ui.nav_panel(
         "🤖 AI Explorer",
 
@@ -162,7 +156,6 @@ app_ui = ui.page_navbar(
             ),
 
             # Visualizations driven by the AI-filtered dataframe
-            # (Team Member 2 will fill these in on feat/ai-tab-viz)
             ui.layout_columns(
                 ui.card(
                     ui.card_header("Mood Map — AI Filtered"),
@@ -189,17 +182,13 @@ app_ui = ui.page_navbar(
 )
 
 
-# =============================================================================
 # Server
-# =============================================================================
 def server(input, output, session):
 
-    # ── Initialize querychat server — returns session-specific reactive state ─
+    # Initialize querychat server
     qc_state = qc.server()
 
-    # =========================================================================
-    # Tab 1 — existing server logic (unchanged)
-    # =========================================================================
+    # existing server logic 
 
     @reactive.calc
     def filtered_df():
@@ -319,10 +308,7 @@ def server(input, output, session):
         fig.tight_layout()
         return fig
 
-    # =========================================================================
-    # Tab 2 — AI Explorer server logic
-    # =========================================================================
-
+    # AI Explorer server logic
     @reactive.calc
     def ai_filtered_df():
         # qc_state.df() returns a narwhals DataFrame; .to_native() gives us pandas
@@ -346,18 +332,62 @@ def server(input, output, session):
     def download_ai_data():
         yield ai_filtered_df().to_csv(index=False)
 
-    # NOTE: stubs for Team Member 2 to replace on feat/ai-tab-viz
     @render.ui
     def ai_plot_mood_map():
-        return ui.p("Mood map coming soon — see feat/ai-tab-viz",
-                    style="text-align:center; padding:2rem; color:grey;")
+        data = ai_filtered_df()
+        if data.empty:
+            return ui.p("No songs match filters", style="text-align:center; padding:2rem;")
+        sample = data.sample(min(500, len(data)), random_state=42)
+        fig = px.scatter(
+            sample, x="valence", y="energy", color="danceability",
+            color_continuous_scale="viridis",
+            hover_data={"track_name": True, "track_artist": True,
+                        "danceability": ":.2f", "valence": ":.2f", "energy": ":.2f"},
+            labels={"valence": "Valence (Sadness → Happiness)",
+                    "energy": "Energy (Calm → Intense)", "danceability": "Danceability"},
+            title=f"Mood Map  —  {len(data):,} songs", opacity=0.6,
+        )
+        fig.add_shape(type="rect", x0=0, x1=0.5, y0=0.5, y1=1.0, fillcolor="#c0d9f5", opacity=0.25, line_width=0)
+        fig.add_shape(type="rect", x0=0.5, x1=1.0, y0=0.5, y1=1.0, fillcolor="#f5e6c0", opacity=0.25, line_width=0)
+        fig.add_shape(type="rect", x0=0, x1=0.5, y0=0.0, y1=0.5, fillcolor="#d4c0f5", opacity=0.25, line_width=0)
+        fig.add_shape(type="rect", x0=0.5, x1=1.0, y0=0.0, y1=0.5, fillcolor="#c0f5d0", opacity=0.25, line_width=0)
+        fig.add_hline(y=0.5, line_dash="dash", line_color="#555555", line_width=1.5, opacity=0.8)
+        fig.add_vline(x=0.5, line_dash="dash", line_color="#555555", line_width=1.5, opacity=0.8)
+        for x, y, text, color in [
+            (0.02, 0.98, "Sad & Intense", "#2a5fa5"),
+            (0.52, 0.98, "Happy & Intense", "#a57a2a"),
+            (0.02, 0.02, "Sad & Calm", "#6a2aa5"),
+            (0.52, 0.02, "Happy & Calm", "#2aa55a"),
+        ]:
+            fig.add_annotation(x=x, y=y, text=f"<b>{text}</b>", xref="paper", yref="paper",
+                               showarrow=False, font=dict(size=11, color=color), opacity=0.75)
+        fig.update_layout(height=400, margin=dict(l=40, r=40, t=50, b=40),
+                          xaxis=dict(range=[0, 1]), yaxis=dict(range=[0, 1]))
+        return ui.HTML(fig.to_html(full_html=False, include_plotlyjs=True))
 
     @render.plot
     def ai_tbl_top_genre():
+        data = ai_filtered_df()
         fig, ax = plt.subplots(figsize=(4, 3))
-        ax.text(0.5, 0.5, "Top genres coming soon\nsee feat/ai-tab-viz",
-                ha="center", va="center", fontsize=11, color="grey")
-        ax.axis("off")
+        if data.empty:
+            ax.text(0.5, 0.5, "No songs match filters", ha="center", va="center", fontsize=12)
+            ax.axis("off")
+            return fig
+        top = (
+            data["playlist_genre"].value_counts().reset_index()
+            .rename(columns={"playlist_genre": "Genre", "count": "Count"})
+            .head(6).sort_values("Count", ascending=True)
+        )
+        bars = ax.barh(top["Genre"], top["Count"], color="#1DB954", edgecolor="none")
+        for bar, val in zip(bars, top["Count"]):
+            ax.text(bar.get_width() + 20, bar.get_y() + bar.get_height() / 2,
+                    f"{val:,}", va="center", fontsize=9)
+        ax.set_xlabel("Number of Songs", fontsize=10)
+        ax.set_title("Top Genres — AI Filtered", fontsize=11, fontweight="bold")
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.set_xlim(0, top["Count"].max() * 1.15)
+        fig.tight_layout()
         return fig
 
 
