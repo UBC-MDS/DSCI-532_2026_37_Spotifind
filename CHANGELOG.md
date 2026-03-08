@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0] - 2026-03-06
+
+### Added
+- AI Explorer tab powered by querychat with natural language data filtering
+- querychat chat sidebar with auto-generated suggestions for exploring Spotify data
+- AI-filtered dataframe table with popularity highlighting (green for songs ≥ 70)
+- Mood Map and Top Genres visualizations driven by AI-filtered data
+- Download button to export AI-filtered dataframe as CSV
+- Converted `page_fluid` to `page_navbar` to support multi-tab layout
+- New dependencies: `querychat`, `chatlas`, `duckdb`, `python-dotenv`
+
 ## [0.2.0] - 2026-02-28
 
 ### Added
