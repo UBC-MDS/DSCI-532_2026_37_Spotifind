@@ -24,3 +24,5 @@ dependencies:
     - shinyswatch>=0.4.0
     - libsass==0.23.0
     - querychat
+    - playwright
+    - pytest-playwright
