@@ -22,6 +22,5 @@ duckdb==1.4.4
 python-dotenv==1.2.2
 anthropic==0.39.0
 httpx==0.27.2
-duckdb==1.4.0
 pyarrow==21.0.0
 ibis-framework[duckdb]==11.0.0
