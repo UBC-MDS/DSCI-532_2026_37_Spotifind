@@ -10,14 +10,6 @@ import ibis
 # Load ANTHROPIC_API_KEY from .env
 load_dotenv()
 
-# Data loading
-df = pd.read_csv("data/raw/spotify_songs.csv")
-df = df.drop_duplicates(subset="track_id")
-df["duration_s"] = (df["duration_ms"] / 1000).round(1)
-
-# Create parquet file
-df.to_parquet("data/processed/spotify_songs.parquet", index=False)
-
 # DuckDB + Ibis connection
 con = ibis.duckdb.connect()
 songs = con.read_parquet("data/processed/spotify_songs.parquet")
