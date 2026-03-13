@@ -6,6 +6,7 @@ from shiny import App, reactive, render, ui
 import plotly.express as px
 from querychat import QueryChat
 import ibis
+import plotly.graph_objects as go
 
 # Load ANTHROPIC_API_KEY from .env
 load_dotenv()
@@ -37,6 +38,75 @@ genre_choices = ["All"] + sorted(
     .tolist()
 )
 
+QUADRANTS = {
+    "sad_intense":   dict(v=(0.0, 0.5), e=(0.5, 1.0), color="#c0d9f5", label="😢 Sad & Intense",   text_color="#2a5fa5"),
+    "happy_intense": dict(v=(0.5, 1.0), e=(0.5, 1.0), color="#f5e6c0", label="😄 Happy & Intense", text_color="#a57a2a"),
+    "sad_calm":      dict(v=(0.0, 0.5), e=(0.0, 0.5), color="#d4c0f5", label="😔 Sad & Calm",      text_color="#6a2aa5"),
+    "happy_calm":    dict(v=(0.5, 1.0), e=(0.0, 0.5), color="#c0f5d0", label="😊 Happy & Calm",    text_color="#2aa55a"),
+}
+
+def build_mood_map(data, selected_quadrant=""):
+    sample = data.sample(min(500, len(data)), random_state=42)
+    fig = go.Figure()
+    quadrant_centers = {
+        "sad_intense": (0.25, 0.75), "happy_intense": (0.75, 0.75),
+        "sad_calm":    (0.25, 0.25), "happy_calm":    (0.75, 0.25),
+    }
+    label_positions = {
+        "sad_intense": (0.02, 0.98), "happy_intense": (0.52, 0.98),
+        "sad_calm":    (0.02, 0.02), "happy_calm":    (0.52, 0.02),
+    }
+    for qname, qinfo in QUADRANTS.items():
+        is_selected = (qname == selected_quadrant)
+        fig.add_shape(
+            type="rect",
+            x0=qinfo["v"][0], x1=qinfo["v"][1],
+            y0=qinfo["e"][0], y1=qinfo["e"][1],
+            fillcolor=qinfo["color"],
+            opacity=0.65 if is_selected else 0.2,
+            line=dict(color=qinfo["text_color"], width=3 if is_selected else 0),
+        )
+        cx, cy = quadrant_centers[qname]
+        fig.add_trace(go.Scatter(
+            x=[cx], y=[cy], mode="markers",
+            marker=dict(size=90, opacity=0, color=qinfo["color"]),
+            name=f"quadrant_{qname}",
+            hovertemplate=f"<b>{qinfo['label']}</b><br>Click to filter data<extra></extra>",
+            showlegend=False,
+        ))
+    fig.add_trace(go.Scatter(
+        x=sample["valence"], y=sample["energy"], mode="markers",
+        marker=dict(color=sample["danceability"], colorscale="viridis",
+                    size=6, opacity=0.6, colorbar=dict(title="Danceability")),
+        customdata=sample[["track_name", "track_artist", "danceability", "valence", "energy"]].values,
+        hovertemplate=(
+            "<b>%{customdata[0]}</b><br>Artist: %{customdata[1]}<br>"
+            "Danceability: %{customdata[2]:.2f}<br>Valence: %{customdata[3]:.2f}<br>"
+            "Energy: %{customdata[4]:.2f}<extra></extra>"
+        ),
+        name="songs", showlegend=False,
+    ))
+    fig.add_hline(y=0.5, line_dash="dash", line_color="#555555", line_width=1.5, opacity=0.8)
+    fig.add_vline(x=0.5, line_dash="dash", line_color="#555555", line_width=1.5, opacity=0.8)
+    for qname, qinfo in QUADRANTS.items():
+        is_selected = (qname == selected_quadrant)
+        lx, ly = label_positions[qname]
+        fig.add_annotation(
+            x=lx, y=ly,
+            text=f"<b>{qinfo['label']}</b>" + (" ✔" if is_selected else ""),
+            xref="paper", yref="paper", showarrow=False,
+            font=dict(size=13 if is_selected else 11, color=qinfo["text_color"]),
+            opacity=1.0 if is_selected else 0.75,
+        )
+    title_suffix = f"  ·  Selected: {QUADRANTS[selected_quadrant]['label']}" if (selected_quadrant and selected_quadrant in QUADRANTS) else ""
+    fig.update_layout(
+        height=420, margin=dict(l=40, r=40, t=50, b=40),
+        xaxis=dict(range=[0, 1], title="Valence (Sadness → Happiness)"),
+        yaxis=dict(range=[0, 1], title="Energy (Calm → Intense)"),
+        title=f"Mood Map  —  {len(data):,} songs{title_suffix}",
+        plot_bgcolor="white", paper_bgcolor="white", clickmode="event",dragmode=False,
+    )
+    return fig
 # UI
 app_ui = ui.page_navbar(
 
@@ -73,6 +143,7 @@ app_ui = ui.page_navbar(
                     open=["Audio Features", "Track Properties"],
                 ),
                 ui.hr(),
+                ui.output_ui("active_quadrant_badge"),  ####
                 ui.input_action_button(
                     "reset_all", "Reset Filters",
                     class_="btn-outline-secondary btn-sm w-100"
@@ -106,8 +177,41 @@ app_ui = ui.page_navbar(
 
             # Mood Map card
             ui.card(
-                ui.card_header("Mood Map — Valence vs Energy"),
+                #ui.card_header("Mood Map — Valence vs Energy"),
+                ui.card_header(
+                    ui.div(
+                        "Mood Map — Valence vs Energy",
+                        ui.span(
+                            "Click on any quadrant to filter data, then click Cancel again.",
+                            style="font-size:0.75rem; color:#6c757d; font-weight:normal;"
+                        ),
+                    )
+                ),
                 ui.output_ui("plot_mood_map"),
+                ui.input_text("clicked_quadrant_raw", label="", value=""),
+                ui.tags.script(ui.HTML("""
+                    function attachQuadrantClick() {
+                        var moodDiv = document.getElementById('plot_mood_map');
+                        if (!moodDiv) return;
+                        var plotlyDiv = moodDiv.querySelector('.plotly-graph-div');
+                        if (!plotlyDiv || !plotlyDiv._fullLayout) return;
+                        plotlyDiv.removeAllListeners('plotly_click');
+                        plotlyDiv.on('plotly_click', function(data) {
+                            var point = data.points[0];
+                            if (!point.data.name || !point.data.name.startsWith('quadrant_')) return;
+                            var quadrant = point.data.name.replace('quadrant_', '');
+                            var inputEl = document.getElementById('clicked_quadrant_raw');
+                            if (inputEl) {
+                                inputEl.value = (inputEl.value === quadrant) ? '' : quadrant;
+                                inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                                inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        });
+                    }
+                    document.addEventListener('DOMContentLoaded', function() {
+                        setInterval(attachQuadrantClick, 500);
+                    });
+                """)),
                 full_screen=True,
             ),
 
@@ -196,6 +300,13 @@ def server(input, output, session):
 
     qc_state = qc.server()
 
+    clicked_quadrant = reactive.value("")
+
+    @reactive.effect
+    def _sync_quadrant():
+        raw = input.clicked_quadrant_raw()
+        clicked_quadrant.set(raw if raw else "")
+
     @reactive.calc
     def filtered_query():
         q = songs.filter(
@@ -211,6 +322,16 @@ def server(input, output, session):
         if input.genre_filter() != "All":
             q = q.filter(songs.playlist_genre == input.genre_filter())
 
+        qname = clicked_quadrant()
+        if qname and qname in QUADRANTS:
+            qinfo = QUADRANTS[qname]
+            q = q.filter(
+                songs.valence >= qinfo["v"][0],
+                songs.valence < qinfo["v"][1],
+                songs.energy >= qinfo["e"][0],
+                songs.energy < qinfo["e"][1],
+            )
+
         return q
 
     @reactive.calc
@@ -219,13 +340,14 @@ def server(input, output, session):
 
     @reactive.calc
     def filtered_summary():
-        summary = filtered_query().aggregate(
-            n=filtered_query().count(),
-            avg_energy=filtered_query().energy.mean(),
-            avg_danceability=filtered_query().danceability.mean(),
+        q = filtered_query()
+        summary = q.aggregate(
+            n=q.count(),
+            avg_energy=q.energy.mean(),
+            avg_danceability=q.danceability.mean(),
         )
         return summary.to_pandas().iloc[0]
-
+    
     @reactive.effect
     @reactive.event(input.reset_all)
     def _reset_filters():
@@ -237,6 +359,25 @@ def server(input, output, session):
         ui.update_slider("duration_s", value=[0, 600])
         ui.update_slider("popularity", value=[0, 100])
         ui.update_select("genre_filter", selected="All")
+        ui.update_text("clicked_quadrant_raw", value="")  
+        clicked_quadrant.set("")        
+
+    @render.ui
+    def active_quadrant_badge():
+        qname = clicked_quadrant()
+        if not qname or qname not in QUADRANTS:
+            return ui.p(ui.tags.em("No quadrant selected"),
+                        style="font-size:0.8rem; color:#6c757d; margin:0;")
+        qinfo = QUADRANTS[qname]
+        
+        return ui.div(
+            ui.span("Mood quadrant filter active:", style="font-size:0.8rem; color:#495057;"),
+            ui.br(),
+            ui.span(qinfo["label"], class_="badge",
+                    style=f"font-size:0.85rem; background-color:{qinfo['text_color']}; color:white; padding:4px 8px; border-radius:4px;"),
+            ui.p(ui.tags.em("Click the same quadrant again to deselect, or click 'Reset Filters'"),
+                style="font-size:0.75rem; color:#6c757d; margin-top:4px;"),
+        )
 
     @render.text
     def kpi_count():
@@ -262,32 +403,7 @@ def server(input, output, session):
         data = filtered_df()
         if data.empty:
             return ui.p("No songs match filters", style="text-align:center; padding:2rem;")
-        sample = data.sample(min(500, len(data)), random_state=42)
-        fig = px.scatter(
-            sample, x="valence", y="energy", color="danceability",
-            color_continuous_scale="viridis",
-            hover_data={"track_name": True, "track_artist": True,
-                        "danceability": ":.2f", "valence": ":.2f", "energy": ":.2f"},
-            labels={"valence": "Valence (Sadness → Happiness)",
-                    "energy": "Energy (Calm → Intense)", "danceability": "Danceability"},
-            title=f"Mood Map  —  {len(data):,} songs", opacity=0.6,
-        )
-        fig.add_shape(type="rect", x0=0, x1=0.5, y0=0.5, y1=1.0, fillcolor="#c0d9f5", opacity=0.25, line_width=0)
-        fig.add_shape(type="rect", x0=0.5, x1=1.0, y0=0.5, y1=1.0, fillcolor="#f5e6c0", opacity=0.25, line_width=0)
-        fig.add_shape(type="rect", x0=0, x1=0.5, y0=0.0, y1=0.5, fillcolor="#d4c0f5", opacity=0.25, line_width=0)
-        fig.add_shape(type="rect", x0=0.5, x1=1.0, y0=0.0, y1=0.5, fillcolor="#c0f5d0", opacity=0.25, line_width=0)
-        fig.add_hline(y=0.5, line_dash="dash", line_color="#555555", line_width=1.5, opacity=0.8)
-        fig.add_vline(x=0.5, line_dash="dash", line_color="#555555", line_width=1.5, opacity=0.8)
-        for x, y, text, color in [
-            (0.02, 0.98, "Sad & Intense", "#2a5fa5"),
-            (0.52, 0.98, "Happy & Intense", "#a57a2a"),
-            (0.02, 0.02, "Sad & Calm", "#6a2aa5"),
-            (0.52, 0.02, "Happy & Calm", "#2aa55a"),
-        ]:
-            fig.add_annotation(x=x, y=y, text=f"<b>{text}</b>", xref="paper", yref="paper",
-                               showarrow=False, font=dict(size=11, color=color), opacity=0.75)
-        fig.update_layout(height=400, margin=dict(l=40, r=40, t=50, b=40),
-                          xaxis=dict(range=[0, 1]), yaxis=dict(range=[0, 1]))
+        fig = build_mood_map(data, selected_quadrant=clicked_quadrant())
         return ui.HTML(fig.to_html(full_html=False, include_plotlyjs=True))
 
     @render.data_frame
