@@ -16,6 +16,51 @@ As the dashboard is being developed, a live preview for developers can be access
 
 If you are interested in contributing to this dashboard, please review the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
 
+## Running Tests
+
+This project have 2 type of tests:
+- **Unit test** - `test_filter_songs.py` - test the filtering logic, make sure it works even in edge cases. 
+- **Playwright test** - `test_app.py` - test the dashboard UI by simulate real interaction like using slider, filter genre, click reset.
+
+Guide on how to run the test:
+
+1. Set up envrionment
+
+```
+conda env create -f environment.yml
+conda activate spotifind
+```
+OR:
+
+```
+pip install -r requirements.txt
+```
+
+2. Install Playwright
+
+```
+playwright install chromium
+```
+
+3. Run tests
+
+Only unit-test:
+```
+pytest tests/test_filter_songs.py
+```
+
+Only playwright test:
+```
+pytest tests/test_app.py
+```
+
+All tests:
+```
+pytest tests/
+```
+
+
+
 ## Dataset Acknowledgement
 
 This project was developed using the following dataset:
