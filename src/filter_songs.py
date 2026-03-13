@@ -12,7 +12,7 @@ def filter_songs(df: pd.DataFrame, danceability = (0.0, 1.0), energy = (0.0, 1.0
     Examples
     --------
     >>> import pandas as pd
-    >>> example_df = {[
+    >>> example_df = [
                        {"danceability": 0.9, "energy": 0.8, "valence": 0.5,
                        "acousticness": 0.1, "tempo": 120, "duration_s": 250,
                        "track_popularity": 80, "playlist_genre": "pop"},
@@ -20,7 +20,7 @@ def filter_songs(df: pd.DataFrame, danceability = (0.0, 1.0), energy = (0.0, 1.0
                        {"danceability": 0.2, "energy": 0.5, "valence": 0.2,
                        "acousticness": 0.1, "tempo": 100, "duration_s": 300,
                        "track_popularity": 80, "playlist_genre": "edm"}
-                       ]}
+                       ]
 
     >>> df = pd.DataFrame([example_df])
     >>> len(filter_songs(df, genre="pop"))
