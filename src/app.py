@@ -5,15 +5,15 @@ from dotenv import load_dotenv
 from shiny import App, reactive, render, ui
 import plotly.express as px
 from querychat import QueryChat
+import ibis
 import plotly.graph_objects as go
 
 # Load ANTHROPIC_API_KEY from .env
 load_dotenv()
 
-# Data loading
-df = pd.read_csv("data/raw/spotify_songs.csv")
-df = df.drop_duplicates(subset="track_id")
-df["duration_s"] = (df["duration_ms"] / 1000).round(1)
+# DuckDB + Ibis connection
+con = ibis.duckdb.connect()
+songs = con.read_parquet("data/processed/spotify_songs.parquet")
 
 # QueryChat — initialized once at module level with a small column subset
 # to keep the schema prompt concise and reduce token usage
@@ -23,10 +23,19 @@ AI_COLS = [
     "track_popularity", "danceability", "energy",
     "valence", "acousticness", "tempo", "duration_s",
 ]
+ai_df = songs.select(*AI_COLS).to_pandas()
 qc = QueryChat(
-    df[AI_COLS],
+    ai_df,
     "spotify_songs",
     client="anthropic/claude-haiku-4-5-20251001",
+)
+
+genre_choices = ["All"] + sorted(
+    songs.select("playlist_genre")
+    .distinct()
+    .to_pandas()["playlist_genre"]
+    .dropna()
+    .tolist()
 )
 
 QUADRANTS = {
@@ -127,7 +136,7 @@ app_ui = ui.page_navbar(
                         ui.input_select(
                             "genre_filter",
                             "Genre",
-                            choices=["All"] + sorted(df["playlist_genre"].dropna().unique().tolist()),
+                            choices= genre_choices,
                             selected="All",
                         ),
                     ),
@@ -289,41 +298,56 @@ app_ui = ui.page_navbar(
 # Server
 def server(input, output, session):
 
-    # Initialize querychat server
     qc_state = qc.server()
 
-    clicked_quadrant = reactive.value("")  
+    clicked_quadrant = reactive.value("")
 
-    @reactive.effect                     
+    @reactive.effect
     def _sync_quadrant():
         raw = input.clicked_quadrant_raw()
         clicked_quadrant.set(raw if raw else "")
 
-    # existing server logic 
-
     @reactive.calc
-    def filtered_df():
-        data = df.copy()
-        data = data[
-            (data["danceability"].between(*input.danceability())) &
-            (data["energy"].between(*input.energy())) &
-            (data["valence"].between(*input.valence())) &
-            (data["acousticness"].between(*input.acousticness())) &
-            (data["tempo"].between(*input.tempo())) &
-            (data["duration_s"].between(*input.duration_s())) &
-            (data["track_popularity"].between(*input.popularity()))
-        ]
+    def filtered_query():
+        q = songs.filter(
+            songs.danceability.between(input.danceability()[0], input.danceability()[1]) &
+            songs.energy.between(input.energy()[0], input.energy()[1]) &
+            songs.valence.between(input.valence()[0], input.valence()[1]) &
+            songs.acousticness.between(input.acousticness()[0], input.acousticness()[1]) &
+            songs.tempo.between(input.tempo()[0], input.tempo()[1]) &
+            songs.duration_s.between(input.duration_s()[0], input.duration_s()[1]) &
+            songs.track_popularity.between(input.popularity()[0], input.popularity()[1])
+        )
+
         if input.genre_filter() != "All":
-            data = data[data["playlist_genre"] == input.genre_filter()]
+            q = q.filter(songs.playlist_genre == input.genre_filter())
+
         qname = clicked_quadrant()
         if qname and qname in QUADRANTS:
             qinfo = QUADRANTS[qname]
-            data = data[
-                (data["valence"] >= qinfo["v"][0]) & (data["valence"] < qinfo["v"][1]) &
-                (data["energy"]  >= qinfo["e"][0]) & (data["energy"]  < qinfo["e"][1])
-            ]
-        return data
+            q = q.filter(
+                songs.valence >= qinfo["v"][0],
+                songs.valence < qinfo["v"][1],
+                songs.energy >= qinfo["e"][0],
+                songs.energy < qinfo["e"][1],
+            )
 
+        return q
+
+    @reactive.calc
+    def filtered_df():
+        return filtered_query().to_pandas()
+
+    @reactive.calc
+    def filtered_summary():
+        q = filtered_query()
+        summary = q.aggregate(
+            n=q.count(),
+            avg_energy=q.energy.mean(),
+            avg_danceability=q.danceability.mean(),
+        )
+        return summary.to_pandas().iloc[0]
+    
     @reactive.effect
     @reactive.event(input.reset_all)
     def _reset_filters():
@@ -345,6 +369,7 @@ def server(input, output, session):
             return ui.p(ui.tags.em("No quadrant selected"),
                         style="font-size:0.8rem; color:#6c757d; margin:0;")
         qinfo = QUADRANTS[qname]
+        
         return ui.div(
             ui.span("Mood quadrant filter active:", style="font-size:0.8rem; color:#495057;"),
             ui.br(),
@@ -356,21 +381,22 @@ def server(input, output, session):
 
     @render.text
     def kpi_count():
-        return f"{len(filtered_df()):,} songs"
+        s = filtered_summary()
+        return f"{int(s['n']):,} songs"
 
     @render.text
     def kpi_energy():
-        data = filtered_df()
-        if data.empty:
+        s = filtered_summary()
+        if pd.isna(s["avg_energy"]):
             return "—"
-        return f"{data['energy'].mean():.2f} / 1.0"
+        return f"{s['avg_energy']:.2f} / 1.0"
 
     @render.text
     def kpi_dance():
-        data = filtered_df()
-        if data.empty:
+        s = filtered_summary()
+        if pd.isna(s["avg_danceability"]):
             return "—"
-        return f"{data['danceability'].mean():.2f} / 1.0"
+        return f"{s['avg_danceability']:.2f} / 1.0"
 
     @render.ui
     def plot_mood_map():
