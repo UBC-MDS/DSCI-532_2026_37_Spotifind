@@ -22,10 +22,10 @@ def filter_songs(df: pd.DataFrame, danceability = (0.0, 1.0), energy = (0.0, 1.0
                        "track_popularity": 80, "playlist_genre": "edm"}
                        ]
 
-    >>> df = pd.DataFrame([example_df])
+    >>> df = pd.DataFrame(example_df)
     >>> len(filter_songs(df, genre="pop"))
     1
-    >>> len(filter_songs(df, energy < 0.2))
+    >>> len(filter_songs(df, energy = (0.0, 0.2)))
     0
     """
     data = df[
