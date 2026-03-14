@@ -424,14 +424,14 @@ def server(input, output, session):
         s = filtered_summary()
         if pd.isna(s["avg_energy"]):
             return "—"
-        return f"{s['avg_energy']:.2f} / 1.0"
+        return f"{s['avg_energy']:.0%}"
 
     @render.text
     def kpi_dance():
         s = filtered_summary()
         if pd.isna(s["avg_danceability"]):
             return "—"
-        return f"{s['avg_danceability']:.2f} / 1.0"
+        return f"{s['avg_danceability']:.0%}"
 
     @render.ui
     def plot_mood_map():
