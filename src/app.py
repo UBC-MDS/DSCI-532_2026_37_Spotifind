@@ -77,8 +77,8 @@ def build_mood_map(data, selected_quadrant=""):
     fig.add_trace(go.Scatter(
         x=sample["valence"], y=sample["energy"], mode="markers",
         marker=dict(color=sample["danceability"], colorscale="viridis",
-                    cmin=df["danceability"].min(),
-                    cmax=df["danceability"].max(),
+                    cmin=data["danceability"].min(),
+                    cmax=data["danceability"].max(),
                     size=6, opacity=0.6, colorbar=dict(title="Danceability")),
         customdata=sample[["track_name", "track_artist", "danceability", "valence", "energy"]].values,
         hovertemplate=(
