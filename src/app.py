@@ -297,13 +297,6 @@ app_ui = ui.page_navbar(
                 class_="btn-success mb-3",
             ),
 
-            # Filtered dataframe table
-            ui.card(
-                ui.card_header("Filtered Songs"),
-                ui.output_data_frame("ai_tbl_results"),
-                full_screen=True,
-            ),
-
             # Visualizations driven by the AI-filtered dataframe
             ui.layout_columns(
                 ui.card(
@@ -317,6 +310,14 @@ app_ui = ui.page_navbar(
                 ),
                 col_widths=[8, 4],
             ),
+
+            # Filtered dataframe table
+            ui.card(
+                ui.card_header("Filtered Songs"),
+                ui.output_data_frame("ai_tbl_results"),
+                full_screen=True,
+            ),
+
         ),
     ),
 
