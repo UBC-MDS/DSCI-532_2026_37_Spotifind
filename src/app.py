@@ -52,10 +52,22 @@ def build_mood_map(data, selected_quadrant=""):
         "sad_intense": (0.25, 0.75), "happy_intense": (0.75, 0.75),
         "sad_calm":    (0.25, 0.25), "happy_calm":    (0.75, 0.25),
     }
+
+    # FIX 1: Use paper coords but anchor right-side labels to the right edge
+    # so the colorbar doesn't push them toward the center divider.
     label_positions = {
-        "sad_intense": (0.02, 0.98), "happy_intense": (0.52, 0.98),
-        "sad_calm":    (0.02, 0.02), "happy_calm":    (0.52, 0.02),
+        "sad_intense":   (0.02, 0.97),
+        "happy_intense": (0.97, 0.97),
+        "sad_calm":      (0.02, 0.03),
+        "happy_calm":    (0.97, 0.03),
     }
+    label_xanchor = {
+        "sad_intense":   "left",
+        "happy_intense": "right",
+        "sad_calm":      "left",
+        "happy_calm":    "right",
+    }
+
     for qname, qinfo in QUADRANTS.items():
         is_selected = (qname == selected_quadrant)
         fig.add_shape(
@@ -90,6 +102,9 @@ def build_mood_map(data, selected_quadrant=""):
     ))
     fig.add_hline(y=0.5, line_dash="dash", line_color="#555555", line_width=1.5, opacity=0.8)
     fig.add_vline(x=0.5, line_dash="dash", line_color="#555555", line_width=1.5, opacity=0.8)
+
+    # FIX 1 (continued): add xanchor and yanchor so right-side labels stay
+    # pinned inside their quadrant regardless of colorbar width.
     for qname, qinfo in QUADRANTS.items():
         is_selected = (qname == selected_quadrant)
         lx, ly = label_positions[qname]
@@ -97,18 +112,22 @@ def build_mood_map(data, selected_quadrant=""):
             x=lx, y=ly,
             text=f"<b>{qinfo['label']}</b>" + (" ✔" if is_selected else ""),
             xref="paper", yref="paper", showarrow=False,
+            xanchor=label_xanchor[qname],
+            yanchor="top" if ly > 0.5 else "bottom",
             font=dict(size=13 if is_selected else 11, color=qinfo["text_color"]),
             opacity=1.0 if is_selected else 0.75,
         )
+
     title_suffix = f"  ·  Selected: {QUADRANTS[selected_quadrant]['label']}" if (selected_quadrant and selected_quadrant in QUADRANTS) else ""
     fig.update_layout(
         height=420, margin=dict(l=40, r=40, t=50, b=40),
         xaxis=dict(range=[0, 1], title="Valence (Sadness → Happiness)"),
         yaxis=dict(range=[0, 1], title="Energy (Calm → Intense)"),
         title=f"Mood Map  —  {len(data):,} songs{title_suffix}",
-        plot_bgcolor="white", paper_bgcolor="white", clickmode="event",dragmode=False,
+        plot_bgcolor="white", paper_bgcolor="white", clickmode="event", dragmode=False,
     )
     return fig
+
 # UI
 app_ui = ui.page_navbar(
 
@@ -138,14 +157,14 @@ app_ui = ui.page_navbar(
                         ui.input_select(
                             "genre_filter",
                             "Genre",
-                            choices= genre_choices,
+                            choices=genre_choices,
                             selected="All",
                         ),
                     ),
                     open=["Audio Features", "Track Properties"],
                 ),
                 ui.hr(),
-                ui.output_ui("active_quadrant_badge"),  ####
+                ui.output_ui("active_quadrant_badge"),
                 ui.input_action_button(
                     "reset_all", "Reset Filters",
                     class_="btn-outline-secondary btn-sm w-100"
@@ -179,7 +198,6 @@ app_ui = ui.page_navbar(
 
             # Mood Map card
             ui.card(
-                #ui.card_header("Mood Map — Valence vs Energy"),
                 ui.card_header(
                     ui.div(
                         "Mood Map — Valence vs Energy",
@@ -190,7 +208,14 @@ app_ui = ui.page_navbar(
                     )
                 ),
                 ui.output_ui("plot_mood_map"),
-                ui.input_text("clicked_quadrant_raw", label="", value=""),
+
+                # FIX 2: Hide the internal text input so it doesn't render
+                # as a visible empty box, causing white space below the chart.
+                ui.div(
+                    ui.input_text("clicked_quadrant_raw", label="", value=""),
+                    style="display:none;",
+                ),
+
                 ui.tags.script(ui.HTML("""
                     function attachQuadrantClick() {
                         var moodDiv = document.getElementById('plot_mood_map');
@@ -248,7 +273,6 @@ app_ui = ui.page_navbar(
     ui.nav_panel(
         "🤖 AI Explorer",
 
-        # make the chat fix and not scrollable
         ui.tags.style("""
             .bslib-sidebar-layout > .sidebar {
                 height: calc(100vh - 80px);
@@ -296,7 +320,7 @@ app_ui = ui.page_navbar(
         ),
     ),
 
-    # ── App-level header ─────────────────────────────────────────────────────
+    # App-level header
     title=ui.div(
         ui.span("🎵 Spotifind", class_="fw-bold"),
         ui.span(" · Spotify Song Explorer", class_="opacity-75 small ms-2"),
@@ -359,7 +383,7 @@ def server(input, output, session):
             avg_danceability=q.danceability.mean(),
         )
         return summary.to_pandas().iloc[0]
-    
+
     @reactive.effect
     @reactive.event(input.reset_all)
     def _reset_filters():
@@ -371,8 +395,8 @@ def server(input, output, session):
         ui.update_slider("duration_s", value=[0, 600])
         ui.update_slider("popularity", value=[0, 100])
         ui.update_select("genre_filter", selected="All")
-        ui.update_text("clicked_quadrant_raw", value="")  
-        clicked_quadrant.set("")        
+        ui.update_text("clicked_quadrant_raw", value="")
+        clicked_quadrant.set("")
 
     @render.ui
     def active_quadrant_badge():
@@ -381,7 +405,6 @@ def server(input, output, session):
             return ui.p(ui.tags.em("No quadrant selected"),
                         style="font-size:0.8rem; color:#6c757d; margin:0;")
         qinfo = QUADRANTS[qname]
-        
         return ui.div(
             ui.span("Mood quadrant filter active:", style="font-size:0.8rem; color:#495057;"),
             ui.br(),
@@ -460,7 +483,6 @@ def server(input, output, session):
     # AI Explorer server logic
     @reactive.calc
     def ai_filtered_df():
-        # qc_state.df() returns a narwhals DataFrame; .to_native() gives us pandas
         return qc_state.df()
 
     @render.data_frame
@@ -502,14 +524,19 @@ def server(input, output, session):
         fig.add_shape(type="rect", x0=0.5, x1=1.0, y0=0.0, y1=0.5, fillcolor="#c0f5d0", opacity=0.25, line_width=0)
         fig.add_hline(y=0.5, line_dash="dash", line_color="#555555", line_width=1.5, opacity=0.8)
         fig.add_vline(x=0.5, line_dash="dash", line_color="#555555", line_width=1.5, opacity=0.8)
-        for x, y, text, color in [
-            (0.02, 0.98, "Sad & Intense", "#2a5fa5"),
-            (0.52, 0.98, "Happy & Intense", "#a57a2a"),
-            (0.02, 0.02, "Sad & Calm", "#6a2aa5"),
-            (0.52, 0.02, "Happy & Calm", "#2aa55a"),
+        for x, y, text, color, xanchor in [
+            (0.02, 0.98, "Sad & Intense",   "#2a5fa5", "left"),
+            (0.97, 0.98, "Happy & Intense", "#a57a2a", "right"),
+            (0.02, 0.02, "Sad & Calm",      "#6a2aa5", "left"),
+            (0.97, 0.02, "Happy & Calm",    "#2aa55a", "right"),
         ]:
-            fig.add_annotation(x=x, y=y, text=f"<b>{text}</b>", xref="paper", yref="paper",
-                               showarrow=False, font=dict(size=11, color=color), opacity=0.75)
+            fig.add_annotation(
+                x=x, y=y, text=f"<b>{text}</b>",
+                xref="paper", yref="paper", showarrow=False,
+                xanchor=xanchor,
+                yanchor="top" if y > 0.5 else "bottom",
+                font=dict(size=11, color=color), opacity=0.75,
+            )
         fig.update_layout(height=400, margin=dict(l=40, r=40, t=50, b=40),
                           xaxis=dict(range=[0, 1]), yaxis=dict(range=[0, 1]))
         return ui.HTML(fig.to_html(full_html=False, include_plotlyjs=True))
