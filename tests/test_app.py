@@ -11,8 +11,8 @@ def test_value_boxes(page: Page, app: ShinyAppProc) -> None:
     page.wait_for_load_state("networkidle") #if test fails try that
 
     controller.OutputText(page, "kpi_count").expect_value("28,356 songs")
-    controller.OutputText(page, "kpi_energy").expect_value("0.70 / 1.0")
-    controller.OutputText(page, "kpi_dance").expect_value("0.65 / 1.0")
+    controller.OutputText(page, "kpi_energy").expect_value("70%")
+    controller.OutputText(page, "kpi_dance").expect_value("65%")
 
 def test_genre_choosing_change_value_box(page: Page, app: ShinyAppProc) -> None:
     """Choosing different genre should change the dislay value of value box"""
@@ -21,8 +21,8 @@ def test_genre_choosing_change_value_box(page: Page, app: ShinyAppProc) -> None:
 
     page.select_option("select#genre_filter", "pop")
     controller.OutputText(page, "kpi_count").expect_value("5,132 songs")
-    controller.OutputText(page, "kpi_energy").expect_value("0.70 / 1.0")
-    controller.OutputText(page, "kpi_dance").expect_value("0.64 / 1.0")
+    controller.OutputText(page, "kpi_energy").expect_value("70%")
+    controller.OutputText(page, "kpi_dance").expect_value("64%")
 
 def test_webpage_not_crash_if_no_song_return_due_to_filter(page: Page, app: ShinyAppProc) -> None:
     """When change a filter that the result is O songs (super extreme filter value), the web-page should still work normally and not crashing."""
@@ -51,5 +51,5 @@ def test_reset_filters_restore_default(page: Page, app: ShinyAppProc) -> None:
     reset_btn.click()
     
     controller.OutputText(page, "kpi_count").expect_value("28,356 songs")
-    controller.OutputText(page, "kpi_energy").expect_value("0.70 / 1.0")
-    controller.OutputText(page, "kpi_dance").expect_value("0.65 / 1.0")
+    controller.OutputText(page, "kpi_energy").expect_value("70%")
+    controller.OutputText(page, "kpi_dance").expect_value("65%")
