@@ -246,6 +246,16 @@ app_ui = ui.page_navbar(
     ui.nav_panel(
         "🤖 AI Explorer",
 
+        # make the chat fix and not scrollable
+        ui.tags.style("""
+            .bslib-sidebar-layout > .sidebar {
+                height: calc(100vh - 80px);
+                overflow-y: auto;
+                position: sticky;
+                top: 60px;
+            }
+        """),
+
         ui.layout_sidebar(
 
             # querychat chat interface in the sidebar
