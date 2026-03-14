@@ -1,5 +1,58 @@
 # Changelog
 
+## [0.4.0] - 2026-03-14
+
+### Added
+
+- Switched data layer to Parquet + DuckDB via ibis for lazy query execution; all filtering now happens at the database level before data enters memory (#58).
+- Added `filtered_summary` reactive calc that runs a DuckDB aggregation for KPI values, avoiding full DataFrame materialization on every filter change (#58).
+- Implemented Option D advanced feature: clickable quadrant interaction on the Mood Map. Clicking a quadrant filters the entire dashboard to songs within that mood region, with visual highlighting and a sidebar badge indicating the active filter (#54).
+- Added Playwright behavior tests and pytest unit tests covering core dashboard logic (#56).
+
+### Changed
+
+- Avg Energy and Avg Danceability KPI boxes now display as percentages (e.g. `70%`) instead of fractions (e.g. `0.70 / 1.0`) for improved readability. Addressed feedback from Tiantong Yin (#57) via #62.
+- Mood Map quadrant labels for right-side quadrants ("Happy & Intense", "Happy & Calm") repositioned using `xanchor="right"` to prevent offset caused by colorbar shrinking paper coordinate space. Addressed feedback from Diana Cornescu (#57) via #61.
+- Removed whitespace below Mood Map caused by hidden `clicked_quadrant_raw` input rendering as a visible empty text box. Addressed feedback from Diana Cornescu (#57) via #61.
+- Mood Map color gradient now pins to unfiltered dataset min/max danceability values for consistent coloring regardless of active filters. Addressed feedback from Tiantong Yin (Critical, #57) via #59.
+- AI tab chat now scrolls independently from the main page content. Addressed feedback from Daniel (Critical, #57) via #60.
+- AI Explorer filtered table now displays before visualizations for a clearer top-down reading flow. Addressed feedback from Diana Cornescu (#57) via #64.
+- Dataframe now fills the full card width. Addressed feedback from Daniel (#57) via #65.
+
+### Fixed
+
+- Bugs resolved since M3 are captured in the feedback items above (#59, #60, #61, #62).
+
+- **Feedback prioritization issue link:** #57
+
+### Known Issues
+
+- Input sliders do not support direct text entry; users must drag to set values. Noted in feedback from Tiantong Yin (#57) but not addressed this milestone due to time constraints.
+- Chatbot conversation grows the sidebar on very long sessions despite the independent scroll fix on the main page.
+
+### Release Highlight: Mood Map Quadrant Click Interaction
+
+Clicking any of the four quadrant regions on the Mood Map (Sad & Intense, Happy & Intense, Sad & Calm, Happy & Calm) now filters the entire dashboard — sliders, results table, KPIs, and top genres chart — to songs within that mood region. A sidebar badge and checkmark on the map indicate the active quadrant. Clicking the same quadrant again deselects it. This makes mood-based song discovery faster and more intuitive, directly supporting the primary use case of finding songs by feel rather than by numeric audio features alone.
+
+- **Option chosen:** D
+- **PR:** #54
+- **Why this option over the others:** Option D directly enhances the primary visual discovery use case without requiring external services, additional API costs, or experimental notebooks. It turns the Mood Map, already the centrepiece of the dashboard, into an interactive filter, giving users a more intuitive entry point than dragging sliders.
+- **Feature prioritization issue link:** #57
+
+### Collaboration
+
+- **CONTRIBUTING.md:** Updated with M3 retrospective and M4 collaboration norms via #63.
+- **M3 retrospective:** Work distribution was unbalanced in M3 and several PRs were merged without review. For M4 we explicitly divided ownership so each member resolved at least one feedback item end-to-end, and enforced at least one approving review before merging.
+- **M4:** All PRs received peer review before merging. Team aimed to complete work by Saturday March 14 ahead of the Tuesday deadline to allow time for final testing and the release.
+
+### Reflection
+
+The dashboard reliably handles all three job stories and the Mood Map click interaction meaningfully improves the discovery experience beyond what sliders alone provide. Current limitations include the lack of text entry on sliders and occasional layout stretch in the AI chat sidebar on long sessions. No intentional deviations from DSCI 531 visualization best practices were made; the Mood Map quadrant background colors were chosen to be perceptually distinct while remaining accessible.
+
+The feedback prioritization process was straightforward — the two critical items (color scaling accuracy and chat scroll) were clear accuracy/UX breaks that had to be fixed first; the remaining non-critical items were distributed across team members with lower-impact ones marked not planned due to time constraints. Full rationale is in #57 and the ### Changed section above.
+
+The querychat and DuckDB/ibis lectures were most directly applicable this milestone. Better coverage of Plotly event handling in Shiny (e.g. `plotly_click` with hidden inputs) would have saved significant debugging time.
+
 ## [0.3.0] - 2026-03-06
 
 ### Added
