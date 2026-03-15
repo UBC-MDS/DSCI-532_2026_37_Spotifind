@@ -24,7 +24,7 @@
 
 - Bugs resolved since M3 are captured in the feedback items above (#59, #60, #61, #62, #67).
 
-- **Feedback prioritization issue link:** #57
+- **Feedback prioritization issue link:** #48
 
 ### Known Issues
 
