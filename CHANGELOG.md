@@ -32,7 +32,7 @@
 
 ### Release Highlight: Mood Map Quadrant Click Interaction
 
-Clicking any of the four quadrant regions on the Mood Map (Sad & Intense, Happy & Intense, Sad & Calm, Happy & Calm) now filters the entire dashboard — sliders, results table, KPIs, and top genres chart — to songs within that mood region. A sidebar badge and checkmark on the map indicate the active quadrant. Clicking the same quadrant again deselects it. This makes mood-based song discovery faster and more intuitive, directly supporting the primary use case of finding songs by feel rather than by numeric audio features alone.
+Clicking any of the four quadrant regions on the Mood Map (Sad & Intense, Happy & Intense, Sad & Calm, Happy & Calm) now filters the entire dashboard: sliders, results table, KPIs, and top genres chart to songs within that mood region. A sidebar badge and checkmark on the map indicate the active quadrant. Clicking the same quadrant again deselects it. This makes mood-based song discovery faster and more intuitive, directly supporting the primary use case of finding songs by feel rather than by numeric audio features alone.
 
 - **Option chosen:** D
 - **PR:** #54
@@ -49,7 +49,7 @@ Clicking any of the four quadrant regions on the Mood Map (Sad & Intense, Happy 
 
 The dashboard reliably handles all three job stories and the Mood Map click interaction meaningfully improves the discovery experience beyond what sliders alone provide. Current limitations include the lack of text entry on sliders and occasional layout stretch in the AI chat sidebar on long sessions. No intentional deviations from DSCI 531 visualization best practices were made; the Mood Map quadrant background colors were chosen to be perceptually distinct while remaining accessible.
 
-The feedback prioritization process was straightforward — the two critical items (color scaling accuracy and chat scroll) were clear accuracy/UX breaks that had to be fixed first; the remaining non-critical items were distributed across team members with lower-impact ones marked not planned due to time constraints. Full rationale is in #57 and the ### Changed section above.
+The feedback prioritization process was straightforward: the two critical items (color scaling accuracy and chat scroll) were clear accuracy/UX breaks that had to be fixed first; the remaining non-critical items were distributed across team members with lower-impact ones marked not planned due to time constraints. Full rationale is in #57 and the ### Changed section above.
 
 The querychat and DuckDB/ibis lectures were most directly applicable this milestone. Better coverage of Plotly event handling in Shiny (e.g. `plotly_click` with hidden inputs) would have saved significant debugging time.
 
