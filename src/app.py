@@ -248,6 +248,7 @@ app_ui = ui.page_navbar(
                     ui.card_header("Results Table"),
                     ui.output_data_frame("tbl_results"),
                     full_screen=True,
+                    style="height: 600px;",
                 ),
                 ui.card(
                     ui.card_header("Top Genres"),
@@ -316,6 +317,7 @@ app_ui = ui.page_navbar(
                 ui.card_header("Filtered Songs"),
                 ui.output_data_frame("ai_tbl_results"),
                 full_screen=True,
+                style="height: 650px;",
             ),
 
         ),
@@ -454,7 +456,7 @@ def server(input, output, session):
         }).sort_values("Popularity", ascending=False).reset_index(drop=True)
         high_pop_rows = data.index[data["Popularity"] >= 70].tolist()
         styles = [{"rows": high_pop_rows, "style": {"background-color": "#d4edda"}}]
-        return render.DataGrid(data, height="250px", width="100%", styles=styles)
+        return render.DataGrid(data, height="520px", width="100%", styles=styles)
 
     @render.plot
     def tbl_top_genre():
@@ -498,7 +500,7 @@ def server(input, output, session):
         }).sort_values("Popularity", ascending=False).reset_index(drop=True)
         high_pop_rows = data.index[data["Popularity"] >= 70].tolist()
         styles = [{"rows": high_pop_rows, "style": {"background-color": "#d4edda"}}]
-        return render.DataGrid(data, height="300px", width="100%", styles=styles)
+        return render.DataGrid(data, height="570px", width="100%", styles=styles)
 
     @render.download(filename="spotifind_ai_filtered.csv")
     def download_ai_data():
