@@ -24,3 +24,9 @@ dependencies:
     - shinyswatch>=0.4.0
     - libsass==0.23.0
     - querychat
+    - duckdb==1.4.4
+    - pyarrow==23.0.1
+    - ibis-framework==12.0.0
+    - pyarrow-hotfix==0.7
+    - playwright
+    - pytest-playwright
