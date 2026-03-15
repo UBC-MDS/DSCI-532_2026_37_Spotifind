@@ -32,7 +32,7 @@ def test_webpage_not_crash_if_no_song_return_due_to_filter(page: Page, app: Shin
     slider = controller.InputSliderRange(page, "duration_s")
     slider.set(("3", "3"), max_err_values=15)
     slider2 = controller.InputSliderRange(page, "energy")
-    slider2.set(("0.99", "0.99"), max_err_values=15)
+    slider2.set(("0.9", "0.9"), max_err_values=15)
     page.wait_for_load_state("networkidle")
     controller.OutputText(page, "kpi_count").expect_value("0 songs")
     controller.OutputText(page, "kpi_energy").expect_value("—")
