@@ -128,8 +128,9 @@ The following items from the M4 Feedback Prioritization issue (#57) were resolve
 | AI tab chat scrolls independently from page | Daniel (Critical) | #60 |
 | Mood Map quadrant labels misaligned on right side; whitespace below chart | Diana Cornescu | #61 |
 | Avg Energy and Avg Danceability displayed as percentages | Tiantong Yin | #62 |
-| AI Explorer — filtered table displayed before visualizations | Diana Cornescu | #64 |
-| Dataframe fills the full card width | Daniel | #65 |
+| Test UI results updated to percentage format | Nguyen | #67 |
+| AI Explorer filtered table displayed before visualizations | Diana Cornescu | #69 |
+| Dataframe fills the full card width | Daniel | #71 |
 
 ---
 

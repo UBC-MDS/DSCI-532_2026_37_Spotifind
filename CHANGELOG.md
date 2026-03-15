@@ -16,12 +16,13 @@
 - Removed whitespace below Mood Map caused by hidden `clicked_quadrant_raw` input rendering as a visible empty text box. Addressed feedback from Diana Cornescu (#57) via #61.
 - Mood Map color gradient now pins to unfiltered dataset min/max danceability values for consistent coloring regardless of active filters. Addressed feedback from Tiantong Yin (Critical, #57) via #59.
 - AI tab chat now scrolls independently from the main page content. Addressed feedback from Daniel (Critical, #57) via #60.
-- AI Explorer filtered table now displays before visualizations for a clearer top-down reading flow. Addressed feedback from Diana Cornescu (#57) via #64.
-- Dataframe now fills the full card width. Addressed feedback from Daniel (#57) via #65.
+- AI Explorer filtered table now displays before visualizations for a clearer top-down reading flow. Addressed feedback from Diana Cornescu (#57) via #69.
+- Dataframe now fills the full card width. Addressed feedback from Daniel (#57) via #71.
+- Test UI results updated to display in percentage format for consistency with KPI boxes (#67).
 
 ### Fixed
 
-- Bugs resolved since M3 are captured in the feedback items above (#59, #60, #61, #62).
+- Bugs resolved since M3 are captured in the feedback items above (#59, #60, #61, #62, #67).
 
 - **Feedback prioritization issue link:** #57
 
