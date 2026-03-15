@@ -25,18 +25,19 @@ def test_genre_choosing_change_value_box(page: Page, app: ShinyAppProc) -> None:
     controller.OutputText(page, "kpi_dance").expect_value("64%")
 
 def test_webpage_not_crash_if_no_song_return_due_to_filter(page: Page, app: ShinyAppProc) -> None:
-    """When change a filter that the result is O songs (super extreme filter value), the web-page should still work normally and not crashing."""
+    """When change a filter that the result is 0 songs (super extreme filter value), the web-page should still work normally and not crashing."""
     page.goto(app.url)
-
     page.select_option("select#genre_filter", "latin")
-    page.wait_for_load_state("networkidle") #if test fails try that
-
+    page.wait_for_load_state("networkidle")
     slider = controller.InputSliderRange(page, "duration_s")
-    slider.set(("3","3"), max_err_values=15)
+    slider.set(("3", "3"), max_err_values=15)
+    slider2 = controller.InputSliderRange(page, "energy")
+    slider2.set(("0.99", "0.99"), max_err_values=15)
+    page.wait_for_load_state("networkidle")
     controller.OutputText(page, "kpi_count").expect_value("0 songs")
     controller.OutputText(page, "kpi_energy").expect_value("—")
     controller.OutputText(page, "kpi_dance").expect_value("—")
-
+    
 def test_reset_filters_restore_default(page: Page, app: ShinyAppProc) -> None:
     """Reset button should restore the default dataset view and number."""
     page.goto(app.url)
